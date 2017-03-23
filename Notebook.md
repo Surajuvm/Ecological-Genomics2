@@ -17,14 +17,14 @@ The purpose of this notebook is to keep track of and organize the information th
 
 **It is absolutely critical for your future self and others to follow your work.**     
 
-* The notebook is set up with a series of internal links from the table of contents.    
-* All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
-* Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-      D* You can document anything you'd like, aside from logging your research activities. For example:
+*  The notebook is set up with a series of internal links from the table of contents.    
+*  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
+*  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
+       D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
-* Lastly, you can share specific entries because of the three "#" automatically creates a link when the notebook renders on github.      
+*  Lastly, you can share specific entries because of the three "#" automatically creates a link when the notebook renders on github.      
 
 
 
@@ -1164,53 +1164,1551 @@ Tried running a few **plots** but don't know enough about them to troubleshoot y
 
 <div id='id-section11'/> 
 
-### Page 11:  
+### Page 11: Notes from command practice in class 2017-03-01; WGCNA  
+
+WGCNA_tutorial_SSW.R (DONE IN R)
+
+Run lines 1 - 5
+
+If you want you can go to link on line 10 to download data
+*We will be using our data
+
+Run line 20 (shows you what directory you are getting data from)
+	change if needed; i'm already in the right one
+
+### Chunk 1
+``` 
+Run lines 31, 39, 41 , 42
+```
+
+### Chunk 2
+```
+sdatExpr0 = as.data.frame(t(starData[, -c(1:1)]));
+dim(sdatExpr0)
+names(sdatExpr0) = starData$X;
+rownames(sdatExpr0) = names(starData)[-c(1:1)];
+```
+
+-c taking out the first row and column so it won't include row and column names
+ *anything with "s' in front is sea star data commands
+
+```
+Run lines 57-60
+```
+
+### Chunk 3
+
+```
+Run lines 73, 74
+```
+According to the help function in R the "goodSamplesGenes" command:
+"...checks data for missing entries and zero-variance genes, and returns a list of samples and genes that pass criteria maximum number of missing values. If necessary, the filtering is iterated."
+
+Therefore I'm assuming this command is pre-checking the quality of the genes before the nex step?
+The cut off of "good genes" we used seems to be 3...? (not sure what 3 means or what it was choosen)
 
 
+### Chunk 4
+
+```
+Run 96-105
+```
+
+This chuck sounds like it is removing the genes that did not met the criteria in chunk 3.
+You can also have it print (aka tell you) the names of the ones removed
+Don't know word for word what the command lines do but that is the genral idea
+
+**Added an 's' to line 101 so that 'gsg' becomes 'sgsg'
+
+
+### Chunk 5
+
+```
+Run lines 125 -133
+```
+
+'sizeGrWindow' allows you to set the size of the window for the graph you are creating
+we are creating a 'sampleTree' which accocrding to R help is not a command in its self:
+R suggested the command might be'sampleNames,AnnotatedDataFrame-method' which according to the help function is:
+An AnnotatedDataFrame consists of two parts. There is a collection of samples and the values of variables measured on those samples. There is also a description of each variable measured. The components of an AnnotatedDataFrame can be accessed with pData and varMetadata.
+
+Showed some graph thing after running chunk 5
+
+### Chunk 6
+
+```
+Run lines 144, 146, 147, 149-152
+```
+
+I see a red line was added to the graph but Idk what else happened
+
+### Chunk 7 
+
+We need to open something (Txt file? countsdata_trim?) and remove the outlier samples I10_5.14_H_0
+
+don't need to do removed columns step
 
 ------
 
 <div id='id-section12'/> 
 
-### Page 12:  
+### Page 12: Notes from command practice in class 2017-03-06;SNPs  
+
+Over the weekend Steve and Melissa called SNPs with two methods:
+
+- samtools
+- reads2snp
+
+But they ran all 94 samples instead of focusing on the 24 individuals so they will re run
+BUT we need to choose which method to use to run (See below for options)
+
+Two ways we can approach this data
+1) merge all data from each individual so we are only focusing on individuals
+* samtools has a merge function in it
+* (+) to this method: increase depth for each individual (increas # of reads)
+
+2) take each replicate per individual and call SNPs seperate then compare reps within individuals 
+* alread set up to run #2
+* less depth but can compare replicates within each individual
+* **We decided to run this method
+
+for the reads2snp he took the earliest date from each individual so we have a sub samples to work with today
+
+Core info we are after:
+
+**Position:** Where is the SNP located within a contig or chromosome of the reference assembly?
+**Alleles:** What are the alleles present at a given SNP? Are there only 2, or are there more? Are they single-nucleotide differences?
+**Depth:** How many reads cover a given SNP? How many reads were observed for each allele?
+**Genotype Quality (GQ):**  How confident are we that we're calling the correct genotype (ex., AA, AT, or TT)?
+**Sample Names:** Where are the data for each individual sample?
+
+Type of file that gives us the above info is called a VCF (variant call format) file
+* you have a header with:
+* trascript ID
+* ID(not for us)
+* REf (allele present in the assmebly)
+* ALT (whatever other alleles it found)
+* QUAL (how confident it is that there is a snp there)
+  	Info (lots of different kinds of info; ie whats its depth (dp) genotype quality, evidence of parology)
+  Header is followed by data:
+  	Example: G    A 
+  	0/0 = GG
+  	1/0 = GA
+  	11/ AA
+
+VCFtools:
+	Should help us filter snps based on depth, genotype quality, etc
+	calc statistics: deviation from HWE, pie etc
+	allows you to subset data file into certain SNPs you are interessted in.
+
+COMMANDS IN PUTTY:
+
+cd to reads2snps
+vim head_SSW_bamlist.txt.vcf
+:set nowrap
+
+*"unres" = unresolved (ie seen with 08_5-08_H_0)
+applied two filters:
+Minimum depth to call a genotype = 10 reads
+Minimum genotype posterior probability = 0.95
+
+If it didn't meet these filters it will list is as missing data(.|.)(.)
+
+run:
+vcftools --vcf SSW_bamlist.txt.vcf
+
+run: grep "unres" SSW_bamlist.txt.vcf | wc
+wc: word count
+This is counting every time the word "unres" is seen
+
+1028494934
+
+Now run grep "para" SSW_bamlist.txt.vcf | wc
+
+  4354  143652  795592
+
+Therefore we have ___ we can remove
+
+Initial    7.47M
+unres:     5.63 M
+PARAlogy:   4354
+Remainder: 1.8 M SNPs 
+
+Now we only want biallelic sites so we will run:
+```
+reads2snps]$ vcftools --vcf  SSW_bamlist.txt.vcf --min-alleles 2 --max-alleles 2
+```
+aftre running it says
+```
+After filtering, kept 20319 out of a possible 7472775 Sites
+```
+
+brings us way down
+
+MAF: minor allele frequency
+run MAF at 0.02
+```
+vcftools --vcf  SSW_bamlist.txt.vcf --maf 0.02
+```
+
+got
+```
+After filtering, kept 5656584 out of a possible 7472775 Sites
+```
+
+Still kept alot (because...)
+
+
+A common cut of is allow 20% missing data
+
+run:
+```
+vcftools --vcf  SSW_bamlist.txt.vcf --max-missing 0.8
+```
+
+you get:
+```
+After filtering, kept 100219 out of a possible 7472775 Sites
+
+```
+
+Normally you won't run each filter one at a time so you would combine your filters into one command:
+
+```
+vcftools --vcf SSW_bamlist.txt.vcf --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --recode --out ~/biallelic.MAF0.02.Miss0.8
+```
+
+The new part to the above command is "--out ~/biallelic.MAF0.02.Miss0.8"
+that is just the file you want it to save to
+
+after it ran is gave us:
+
+```
+After filtering, kept 1180 out of a possible 7472775 Sites
+```
+
+This means we only have about 1180 SNPs which is low but we did only run 1 from each individual
+
+Go check on file by going to your home directory (~/) and opening the head of the file you just created
+```
+vim biallelic.MAF0.02.Miss0.8.recode.vcf
+:set nowrap
+```
+
+Now we will run the hardy winberg test on our data:
+
+```
+vcftools --vcf biallelic.MAF0.02.Miss0.8.recode.vcf --hardy
+```
+
+We can look at the head of the file it generated:
+
+```
+head out.hwe
+```
+
+looked wierd so we are reading it with R WITHIN the command line:
+```
+R
+```
+opens R 
+```
+hardy <- read.table("out.hwe", header = T)
+str(hardy)
+```
+
+```
+hardy[which(hardy$P_HET_EXCESS<0.001),]
+```
+
+output just the rows that have heterozygous excess when p<0.001
+
+```
+hardy[which(hardy$P_HET_DEFICIT<0.001),]
+```
+ouput just the rows that have heterozygous deficit when p<0.001
+
+Looks like this:
+```
+                                                                 CHR POS
+291 TRINITY_DN45155_c27_g1_TRINITY_DN45155_c27_g1_i1_g.18742_m.18742  99
+293 TRINITY_DN45155_c27_g1_TRINITY_DN45155_c27_g1_i1_g.18742_m.18742 138
+401     TRINITY_DN39079_c3_g1_TRINITY_DN39079_c3_g1_i1_g.8354_m.8354 244
+406     TRINITY_DN39696_c4_g1_TRINITY_DN39696_c4_g1_i1_g.8926_m.8926 283
+    OBS.HOM1.HET.HOM2. E.HOM1.HET.HOM2. ChiSq_HWE        P_HWE P_HET_DEFICIT
+291            11/0/13  5.04/11.92/7.04        24 9.114786e-08  9.114786e-08
+293             19/0/5  15.04/7.92/1.04        24 6.498371e-06  6.498371e-06
+401            13/0/11  7.04/11.92/5.04        24 9.114786e-08  9.114786e-08
+406            13/0/11  7.04/11.92/5.04        24 9.114786e-08  9.114786e-08
+    P_HET_EXCESS
+291            1
+293            1
+401            1
+406            1
+```
+
+The "11/0/13" is:
+	11 # of homozygotes 1
+	0 # heterozygous
+	13 # homozygotes 2
+These should add up to 24 (number of individuals we have)
+
+Now we are going to calculate disequilibriume
+
+First quite R:
+```
+quit ()
+```
+
+Nevermind it was going to take too long
+Instead we are trying genome R squared
+```
+R
+```
+```
+ld <- read.table("out.geno.ld",header=T)
+str(ld)
+ld$dist <- abs(ld$POS1-ld$POS2)
+str(ld)
+```
+
+ld$dist <- abs(ld$POS1-ld$POS2) This calc the absolute value of these two columns to calc the distance
+
+
 
 ------
 
 <div id='id-section13'/> 
 
-### Page 13:  
+### Page 13: Notes from meeting with Steve 2017-03-06; HW2  
+
+first variable in design is always control variable 
+square brakets lets you select rows and columns (blank = select all) []
+bring up in write up that we used 100 reads cut off even thought # of individuals changes (can play around withit)
+Basemean = ho dif from mean calc with design
+log2fold change = the # times (double) that the gene is more expressed (in sick vs health with model 1)
+
+
+```
+> library("ggplot2")
+> 
+> countsTable <- read.delim('countsdata_trim2.txt', header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> countData <- as.matrix(countsTable)
+> View(countsTable)
+> View(countsTable)
+> conds <- read.delim("cols_data_trim.txt", header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> head(conds)
+             indiv   day health score location
+I03_5.08_S_2   I03 day03      S     2      int
+I03_5.11_S_4   I03 day06      S     4      int
+I07_5.08_S_1   I07 day03      S     1      int
+I08_5.08_H_0   I08 day03      H     0      int
+I08_5.11_S_1   I08 day06      S     1      int
+I08_5.14_S_1   I08 day09      S     1      int
+> colData <- as.data.frame(conds)
+> View(colData)
+> dim(countData)
+[1] 13053    77
+```
+Everything so far has been normal; we read in the full column and counts tables to be used.
+Now we need to trim the col and count tables to include ONLY intertidal data (int) and then again so we have ones with ONLY subtidal (sub) data
+First you need to go into the text file (manually)
+	You will notice they are already organized so that the individuals you see first happen to be intertidal and second are subtital
+	Therfore, we can count the number of rows that have intertidal (48)
+	Now we know to trim the file so that rows 1-48 are all you have in your intertidal file and rows 49-77 are all you have in your subtidal file
+	Since we still want all the other data we leave the other part of the [] empty but seperated with a ,
+```
+> count_int = countData[,1:48]
+> dim(count_int)
+[1] 13053    48
+```
+See now we only have 48 individuals in the int file vs 77
+```
+> View(count_int)
+> count_sub = countData[,49:77]
+> dim(count_sub)
+[1] 13053    29
+```
+now we only have 29 individuals in the subtidal group 
+```
+> write.table(count_int,"count_int.txt")
+```
+The above command saves the table to the desktop.
+Since we didn't specify where it will be saved in the file that the R session is currently working in
+If you want to specify where you would add the location before the file name within the ""
+
+Now we will do the same type of triming to the col data
+```
+> col_int = colData[1:48,]
+> dim(col_int)
+[1] 48  5
+> col_sub = colData[49:77,]
+> dim(col_sub)
+[1] 29  5
+```
+NOW we can use the files we trimed to start with the intertidal health analysis
+the design always need ~ (see hand written notes from meeting for more detail)
+
+```
+> dds_int <- DESeqDataSetFromMatrix(countData = count_int, colData = col_int, design = ~ health)
+> dim(dds_int)
+[1] 13053    48
+```
+The above command got the tables and design ready to run
+The below command will set a filter to say we only want genes that have 100 or more reads
+	**This cut off can change based on the number of individuals etc. play around with the cut off and see how many genes you lose each time
+```
+> dds_int <- dds_int[ rowSums(counts(dds_int)) > 100, ]
+> dim(dds_int)
+[1] 12405    48
+```
+We lost a few more genes by keeping the 100 reads cut off then when we ran the health using location as a contorl analysis
+
+```
+> colData(dds_int)$health <- factor(colData(dds_int)$health, levels=c("H","S"))
+```
+the above line sets health as the reference
+the below line FINALLY runs the DESeq using all the conditions we just set up through the previous commands
+
+```
+> dds_int <- DESeq(dds_int)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 1529 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+```
+The following lines take the results and organize them by adjusted p value (padj) then prints the head of the file so we can look at it
+
+```
+> res_int <- results(dds_int)
+> res_int <- res_int[order(res_int$padj),]
+> head(res_int)
+log2 fold change (MAP): health S vs H 
+Wald test p-value: health S vs H 
+DataFrame with 6 rows and 6 columns
+                                                                baseMean log2FoldChange     lfcSE
+                                                               <numeric>      <numeric> <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110 1329.5134       2.646091 0.4276262
+TRINITY_DN45253_c3_g1_TRINITY_DN45253_c3_g1_i2_g.18927_m.18927 1351.4485       1.819147 0.3311362
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  849.5637       1.258881 0.2413130
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  434.6755       1.958255 0.3726593
+TRINITY_DN46844_c0_g1_TRINITY_DN46844_c0_g1_i3_g.23563_m.23563  471.0032       2.485896 0.4905046
+TRINITY_DN43023_c0_g1_TRINITY_DN43023_c0_g1_i1_g.14016_m.14016  345.5715       2.284716 0.4542991
+                                                                    stat       pvalue         padj
+                                                               <numeric>    <numeric>    <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110  6.187859 6.098700e-10 1.844247e-06
+TRINITY_DN45253_c3_g1_TRINITY_DN45253_c3_g1_i2_g.18927_m.18927  5.493653 3.937030e-08 5.952790e-05
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  5.216799 1.820412e-07 1.376232e-04
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  5.254813 1.481747e-07 1.376232e-04
+TRINITY_DN46844_c0_g1_TRINITY_DN46844_c0_g1_i3_g.23563_m.23563  5.068037 4.019384e-07 2.430924e-04
+TRINITY_DN43023_c0_g1_TRINITY_DN43023_c0_g1_i1_g.14016_m.14016  5.029100 4.927866e-07 2.483645e-04
+```
+Finally, we look at the summary for the intsick vs inthealthy:
+```
+> summary(res_int)
+
+out of 12399 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)     : 205, 1.7% 
+LFC < 0 (down)   : 37, 0.3% 
+outliers [1]     : 0, 0% 
+low counts [2]   : 9381, 76% 
+(mean count < 41)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results
+```
 
 ------
 
 
 <div id='id-section14'/> 
 
+### Page 14: Script for Homework #2; 2017-03-08  
 
-### Page 14:  
+#### Code from 3/3/17 run at 3:55pm; health with location as control
 
+Basically I ran model #1 as is:
+```
+setwd("C:/Users/Hannah/Desktop/DGE data from 2-27")
+> library("DESeq2")
+> 
+> library("ggplot2")
+> 
+> countsTable <- read.delim('countsdata_trim2.txt', header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> countData <- as.matrix(countsTable)
+> head(countData)
+                                                           I03_5.08_S_2 I03_5.11_S_4 I07_5.08_S_1 I08_5.08_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            4           26          246            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           17            0            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0           11          262           55
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852           34            0           61            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853           34            5            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855          141           85            0           29
+                                                           I08_5.11_S_1 I08_5.14_S_1 I08_5.17_S_2 I08_5.20_S_3
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0           68           26            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0           21            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            2
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0           34            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0           76           64            0
+                                                           I09_5.08_H_0 I09_5.14_S_2 I09_5.17_S_2 I09_5.20_S_5
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            0            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0           69            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            1
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            0            6
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            3            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           10            6           99           28
+                                                           I10_5.08_H_0 I10_5.11_H_0 I10_5.14_H_0 I10_5.17_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            0            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0            4            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0          194
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            2            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0            0            0          439
+                                                           I10_5.20_S_2 I14_5.08_S_2 I14_5.11_S_2 I15_5.08_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0           20            9            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0           27            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            0           58
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0           59            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           61           14           11            0
+                                                           I15_5.11_H_0 I15_5.14_H_0 I15_5.20_S_3 I19_5.11_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           15           16            0            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           14            0            0           40
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            5            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0           10            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0           14           17            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           64          100           48           85
+                                                           I19_5.14_H_0 I19_5.17_H_0 I19_5.20_S_5 I20_5.08_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0           38            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           30            0            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852           19            0            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853           22           10           27            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            1            0           52            0
+                                                           I20_5.11_H_0 I20_5.14_H_0 I20_5.17_H_0 I20_5.20_S_2
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           36            0            0           34
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           10            0            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              6            0            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852           19            0            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853           18            0            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           47           14            2            0
+                                                           I22_5.08_S_1 I24_5.11_H_0 I24_5.14_H_0 I24_5.17_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0           24            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0           18            2
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0           16            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            2            0           26            0
+                                                           I26_5.08_S_2 I26_5.11_S_3 I27_5.08_H_0 I27_5.11_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0           16            0            2
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0            8           30
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            4
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            0           11
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0           16            9
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0           43            5           13
+                                                           I27_5.14_H_0 I27_5.20_H_0 I28_5.08_S_1 I28_5.11_S_1
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            2            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0           18            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0           20            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0            0            0           38
+                                                           I28_5.14_S_2 I29_5.08_S_2 I29_5.11_S_2 I29_5.14_S_2
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           14            0            0           20
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           47           18            0            8
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0            0            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0           23           20            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           89           10            0           16
+                                                           I31_6.12_H_0 I31_6.15_H_0 I31_6.18_H_0 I31_6.21_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            0            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0            0            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101             34            0           27            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0          119            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853           11            0           74            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           33           58            1           26
+                                                           I31_6.24_H_0 I32_6.12_H_0 I32_6.15_H_0 I32_6.18_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           33           10            3            2
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           50           49            8           13
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0           10           18
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852           44            4           14            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            0            5
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0           13           46            0
+                                                           I32_6.21_H_0 I33_6.12_H_0 I33_6.15_H_0 I33_6.18_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            0           74
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0           46            0           29
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0           24            6
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0           11            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            0           36           37           26
+                                                           I33_6.21_H_0 I33_6.24_H_0 I34_6.12_H_0 I34_6.15_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           11            0            0            6
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            4            0            0            4
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101             12           26           56            2
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0           29           69           20
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            6            0            0           16
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           17          112           40           59
+                                                           I34_6.18_H_0 I34_6.21_H_0 I35_6.12_H_0 I35_6.15_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            0            0            5            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           44           20            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              0            0           30           62
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            0            0            6            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            0            0            6            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855          102            6           18            0
+                                                           I35_6.18_H_0 I35_6.21_H_0 I36_6.12_S_1 I36_6.15_S_2
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850            1            0            0            0
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851           54           15            0            0
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101             14            0           28            0
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            6            8            0           88
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            9           20           14            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855            8           26           24            0
+                                                           I36_6.18_S_3 I37_6.12_H_0 I37_6.15_S_1 I37_6.18_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           22           20           12            7
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            0           57            0          111
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              9            5            0           54
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852            7           16            0            0
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853           16           49            0            0
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           10           22            0            8
+                                                           I38_6.12_H_0
+TRINITY_DN10003_c0_g1_TRINITY_DN10003_c0_g1_i1_g.850_m.850           10
+TRINITY_DN10009_c0_g1_TRINITY_DN10009_c0_g1_i1_g.851_m.851            6
+TRINITY_DN1000_c0_g1_TRINITY_DN1000_c0_g1_i1_g.101_m.101              7
+TRINITY_DN10011_c0_g1_TRINITY_DN10011_c0_g1_i1_g.852_m.852           22
+TRINITY_DN10021_c0_g1_TRINITY_DN10021_c0_g1_i1_g.853_m.853            2
+TRINITY_DN10033_c0_g1_TRINITY_DN10033_c0_g1_i1_g.855_m.855           10
+> 
+> conds <- read.delim("cols_data_trim.txt", header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> head(conds)
+             indiv   day health score location
+I03_5.08_S_2   I03 day03      S     2      int
+I03_5.11_S_4   I03 day06      S     4      int
+I07_5.08_S_1   I07 day03      S     1      int
+I08_5.08_H_0   I08 day03      H     0      int
+I08_5.11_S_1   I08 day06      S     1      int
+I08_5.14_S_1   I08 day09      S     1      int
+> colData <- as.data.frame(conds)
+> head(colData)
+             indiv   day health score location
+I03_5.08_S_2   I03 day03      S     2      int
+I03_5.11_S_4   I03 day06      S     4      int
+I07_5.08_S_1   I07 day03      S     1      int
+I08_5.08_H_0   I08 day03      H     0      int
+I08_5.11_S_1   I08 day06      S     1      int
+I08_5.14_S_1   I08 day09      S     1      int
+> dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)
+> dim(dds)
+[1] 13053    77
+> dds <- dds[ rowSums(counts(dds)) > 100, ]
+> colData(dds)$health <- factor(colData(dds)$health, levels=c("H","S")) #sets that "healthy is the reference
+> dds <- DESeq(dds)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 1051 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res <- results(dds)
+> res <- res[order(res$padj),]
+> head(res)
+log2 fold change (MAP): health S vs H 
+Wald test p-value: health S vs H 
+DataFrame with 6 rows and 6 columns
+                                                                baseMean log2FoldChange     lfcSE
+                                                               <numeric>      <numeric> <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110 1105.7751       2.501124 0.3832201
+TRINITY_DN42378_c1_g1_TRINITY_DN42378_c1_g1_i2_g.12752_m.12752  172.5713       3.255263 0.5164368
+TRINITY_DN45416_c4_g2_TRINITY_DN45416_c4_g2_i3_g.19333_m.19333 1501.8405       2.050527 0.3404161
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  802.6078       1.173162 0.2019297
+TRINITY_DN46136_c0_g1_TRINITY_DN46136_c0_g1_i2_g.21366_m.21366  729.2029       2.534860 0.4405170
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  379.4915       1.813462 0.3140506
+                                                                    stat       pvalue         padj
+                                                               <numeric>    <numeric>    <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110  6.526600 6.727945e-11 3.279873e-07
+TRINITY_DN42378_c1_g1_TRINITY_DN42378_c1_g1_i2_g.12752_m.12752  6.303313 2.913489e-10 7.101629e-07
+TRINITY_DN45416_c4_g2_TRINITY_DN45416_c4_g2_i3_g.19333_m.19333  6.023590 1.705906e-09 2.772097e-06
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  5.809755 6.256419e-09 7.069528e-06
+TRINITY_DN46136_c0_g1_TRINITY_DN46136_c0_g1_i2_g.21366_m.21366  5.754284 8.700957e-09 7.069528e-06
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  5.774428 7.721500e-09 7.069528e-06
+> summary(res)
+
+out of 12947 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)     : 209, 1.6% 
+LFC < 0 (down)   : 65, 0.5% 
+outliers [1]     : 400, 3.1% 
+low counts [2]   : 7679, 59% 
+(mean count < 23)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results
+```
+
+**
+LFC > 0 (up)     : 209, 1.6%  **SICK** 
+LFC < 0 (down)   : 65, 0.5%   **HEALTHY**
+
+The above data means that **209** gene are more highly expressed in **Sick** and ***65*** genes were more highly expressed in ***healthy***
+
+
+
+#### Code from 3-6-17; intS vs intH; subS vs subH
+
+```
+> library("ggplot2")
+> 
+> countsTable <- read.delim('countsdata_trim2.txt', header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> countData <- as.matrix(countsTable)
+> View(countsTable)
+> View(countsTable)
+> conds <- read.delim("cols_data_trim.txt", header=TRUE, stringsAsFactors=TRUE, row.names=1)
+> head(conds)
+             indiv   day health score location
+I03_5.08_S_2   I03 day03      S     2      int
+I03_5.11_S_4   I03 day06      S     4      int
+I07_5.08_S_1   I07 day03      S     1      int
+I08_5.08_H_0   I08 day03      H     0      int
+I08_5.11_S_1   I08 day06      S     1      int
+I08_5.14_S_1   I08 day09      S     1      int
+> colData <- as.data.frame(conds)
+> View(colData)
+> dim(countData)
+[1] 13053    77
+```
+Everything so far has been normal; we read in the full column and counts tables to be used.
+Now we need to trim the col and count tables to include ONLY intertidal data (int) and then again so we have ones with ONLY subtidal (sub) data
+First you need to go into the text file (manually)
+You will notice they are already organized so that the individuals you see first happen to be intertidal and second are subtital
+Therfore, we can count the number of rows that have intertidal (48)
+Now we know to trim the file so that rows 1-48 are all you have in your intertidal file and rows 49-77 are all you have in your subtidal file
+Since we still want all the other data we leave the other part of the [] empty but seperated with a ,
+```
+> count_int = countData[,1:48]
+> dim(count_int)
+[1] 13053    48
+```
+See now we only have 48 individuals in the int file vs 77
+```
+> View(count_int)
+> count_sub = countData[,49:77]
+> dim(count_sub)
+[1] 13053    29
+```
+now we only have 29 individuals in the subtidal group 
+Now we will do the same type of triming to the col data
+```
+> col_int = colData[1:48,]
+> dim(col_int)
+[1] 48  5
+> col_sub = colData[49:77,]
+> dim(col_sub)
+[1] 29  5
+```
+NOW we can use the files we trimed to start with the intertidal health analysis
+```
+> dds_int <- DESeqDataSetFromMatrix(countData = count_int, colData = col_int, design = ~ health)
+> dim(dds_int)
+[1] 13053    48
+```
+The below command will set a filter to say we only want genes that have 100 or more reads
+	**This cut off can change based on the number of individuals etc. play around with the cut off and see how many genes you lose each time
+```
+> dds_int <- dds_int[ rowSums(counts(dds_int)) > 100, ]
+> dim(dds_int)
+[1] 12405    48
+```
+We lost a few more genes by keeping the 100 reads cut off then when we ran the health using location as a contorl analysis
+Now we will set health as the reference and run the DESeq analysis 
+```
+> colData(dds_int)$health <- factor(colData(dds_int)$health, levels=c("H","S"))
+> dds_int <- DESeq(dds_int)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 1529 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_int <- results(dds_int)
+> res_int <- res_int[order(res_int$padj),]
+> head(res_int)
+log2 fold change (MAP): health S vs H 
+Wald test p-value: health S vs H 
+DataFrame with 6 rows and 6 columns
+                                                                baseMean log2FoldChange     lfcSE
+                                                               <numeric>      <numeric> <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110 1329.5134       2.646091 0.4276262
+TRINITY_DN45253_c3_g1_TRINITY_DN45253_c3_g1_i2_g.18927_m.18927 1351.4485       1.819147 0.3311362
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  849.5637       1.258881 0.2413130
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  434.6755       1.958255 0.3726593
+TRINITY_DN46844_c0_g1_TRINITY_DN46844_c0_g1_i3_g.23563_m.23563  471.0032       2.485896 0.4905046
+TRINITY_DN43023_c0_g1_TRINITY_DN43023_c0_g1_i1_g.14016_m.14016  345.5715       2.284716 0.4542991
+                                                                    stat       pvalue         padj
+                                                               <numeric>    <numeric>    <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110  6.187859 6.098700e-10 1.844247e-06
+TRINITY_DN45253_c3_g1_TRINITY_DN45253_c3_g1_i2_g.18927_m.18927  5.493653 3.937030e-08 5.952790e-05
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  5.216799 1.820412e-07 1.376232e-04
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  5.254813 1.481747e-07 1.376232e-04
+TRINITY_DN46844_c0_g1_TRINITY_DN46844_c0_g1_i3_g.23563_m.23563  5.068037 4.019384e-07 2.430924e-04
+TRINITY_DN43023_c0_g1_TRINITY_DN43023_c0_g1_i1_g.14016_m.14016  5.029100 4.927866e-07 2.483645e-04
+> summary(res_int)
+
+out of 12399 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)     : 205, 1.7% 
+LFC < 0 (down)   : 37, 0.3% 
+outliers [1]     : 0, 0% 
+low counts [2]   : 9381, 76% 
+(mean count < 41)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results
+```
+This concludes that for intS vs intH:
+**205** genes were more highly expressed in **sick**
+***37*** genes were more highly expressed in ***healthy***
+​	
+​	
+​	
+**NOW** to run the subtidal analysis:
+
+```
+> dds_sub <- DESeqDataSetFromMatrix(countData = count_sub, colData = col_sub, design = ~ health)
+> dim(dds_sub)
+[1] 13053    29
+> dds_sub <- dds_sub[ rowSums(counts(dds_sub)) > 100, ]
+> dim(dds_sub)
+[1] 12397    29
+> colData(dds_sub)$health <- factor(colData(dds_sub)$health, levels=c("H","S"))
+> dds_sub <- DESeq(dds_sub)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 1052 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_sub <- results(dds_sub)
+> res_sub <- res_sub[order(res_sub$padj),]
+> head(res_sub)
+log2 fold change (MAP): health S vs H 
+Wald test p-value: health S vs H 
+DataFrame with 6 rows and 6 columns
+                                                                baseMean
+                                                               <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173  37.90189
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557    26.56170
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988 163.41417
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198    32.42672
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493 140.59010
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214  45.06837
+                                                               log2FoldChange
+                                                                    <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173      -5.731428
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557        -4.295459
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988      -3.155248
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198        -5.029507
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493      -3.026674
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214      -4.584825
+                                                                   lfcSE
+                                                               <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173 0.9113462
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557   0.7883082
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988 0.5811646
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198   0.9498760
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493 0.6107190
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214 0.9381238
+                                                                    stat
+                                                               <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173 -6.288969
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557   -5.448959
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988 -5.429181
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198   -5.294909
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493 -4.955919
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214 -4.887229
+                                                                     pvalue
+                                                                  <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173 3.195814e-10
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557   5.066560e-08
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988 5.661319e-08
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198   1.190760e-07
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493 7.198939e-07
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214 1.022653e-06
+                                                                       padj
+                                                                  <numeric>
+TRINITY_DN42073_c0_g1_TRINITY_DN42073_c0_g1_i1_g.12173_m.12173 2.384397e-06
+TRINITY_DN29480_c0_g1_TRINITY_DN29480_c0_g1_i1_g.3557_m.3557   1.407970e-04
+TRINITY_DN46933_c2_g1_TRINITY_DN46933_c2_g1_i1_g.23988_m.23988 1.407970e-04
+TRINITY_DN31786_c0_g1_TRINITY_DN31786_c0_g1_i1_g.4198_m.4198   2.221065e-04
+TRINITY_DN43786_c1_g1_TRINITY_DN43786_c1_g1_i1_g.15493_m.15493 1.074226e-03
+TRINITY_DN40724_c3_g1_TRINITY_DN40724_c3_g1_i1_g.10214_m.10214 1.271669e-03
+> summary(res_sub)
+
+out of 12392 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)     : 20, 0.16% 
+LFC < 0 (down)   : 113, 0.91% 
+outliers [1]     : 647, 5.2% 
+low counts [2]   : 4289, 35% 
+(mean count < 13)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results
+```
+This concludes that for subS vs subH:
+**20** genes were more highly expressed in **sick**
+***113*** genes were more highly expressed in ***healthy***
+
+
+
+#### Code from 3-7-17; plots
+
+```
+> vsd <- varianceStabilizingTransformation(dds_int, blind=FALSE)
+> vsd_int <- varianceStabilizingTransformation(dds_int, blind=FALSE)
+> plotPCA(vsd_int, intgroup=c("health"))
+> vsd_sub <- varianceStabilizingTransformation(dds_sub, blind=FALSE)
+> plotPCA(vsd_sub, intgroup=c("health"))
+```
+I had to re run the health with location as control model since I had exited out of R since I last ran it:
+```
+> dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)
+> dim(dds)
+[1] 13053    77
+> dds <- dds[ rowSums(counts(dds)) > 100, ]
+> dim(dds)
+[1] 12954    77
+> colData(dds)$health <- factor(colData(dds)$health, levels=c("H","S")) #sets that "healthy is the reference
+> dds <- DESeq(dds)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 1051 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res <- results(dds)
+> res <- res[order(res$padj),]
+> head(res)
+log2 fold change (MAP): health S vs H 
+Wald test p-value: health S vs H 
+DataFrame with 6 rows and 6 columns
+                                                                baseMean log2FoldChange     lfcSE
+                                                               <numeric>      <numeric> <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110 1105.7751       2.501124 0.3832201
+TRINITY_DN42378_c1_g1_TRINITY_DN42378_c1_g1_i2_g.12752_m.12752  172.5713       3.255263 0.5164368
+TRINITY_DN45416_c4_g2_TRINITY_DN45416_c4_g2_i3_g.19333_m.19333 1501.8405       2.050527 0.3404161
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  802.6078       1.173162 0.2019297
+TRINITY_DN46136_c0_g1_TRINITY_DN46136_c0_g1_i2_g.21366_m.21366  729.2029       2.534860 0.4405170
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  379.4915       1.813462 0.3140506
+                                                                    stat       pvalue         padj
+                                                               <numeric>    <numeric>    <numeric>
+TRINITY_DN43080_c1_g1_TRINITY_DN43080_c1_g1_i3_g.14110_m.14110  6.526600 6.727945e-11 3.279873e-07
+TRINITY_DN42378_c1_g1_TRINITY_DN42378_c1_g1_i2_g.12752_m.12752  6.303313 2.913489e-10 7.101629e-07
+TRINITY_DN45416_c4_g2_TRINITY_DN45416_c4_g2_i3_g.19333_m.19333  6.023590 1.705906e-09 2.772097e-06
+TRINITY_DN43359_c0_g1_TRINITY_DN43359_c0_g1_i1_g.14658_m.14658  5.809755 6.256419e-09 7.069528e-06
+TRINITY_DN46136_c0_g1_TRINITY_DN46136_c0_g1_i2_g.21366_m.21366  5.754284 8.700957e-09 7.069528e-06
+TRINITY_DN46589_c0_g1_TRINITY_DN46589_c0_g1_i1_g.22741_m.22741  5.774428 7.721500e-09 7.069528e-06
+> summary(res)
+
+out of 12947 with nonzero total read count
+adjusted p-value < 0.1
+LFC > 0 (up)     : 209, 1.6% 
+LFC < 0 (down)   : 65, 0.5% 
+outliers [1]     : 400, 3.1% 
+low counts [2]   : 7679, 59% 
+(mean count < 23)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results
+```
+
+Now back to making plots:
+```
+> vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
+> plotPCA(vsd, intgroup=c("health"))
+> plotPCA(vsd, intgroup=c("health","location"))
+> plotPCA(vsd_int, intgroup=c("health","location"))
+> plotPCA(vsd_sub, intgroup=c("health","location"))
+```
 ------
 
 <div id='id-section15'/> 
 
-### Page 15:  
+### Page 15: Notes from command practice in class 2017-03-08;  
+
+Steve merged all data for each individual into one file and called snps for each of the merged files
+
+To access that file go to:
+```
+cd /data/project_data/snps/reads2snps
+```
+
+We are interested in this file:
+```
+SSW_byind.txt.vcf.gz
+```
+gz = zipped; Thats why its red; we can't look into this file (head/tail) because its zipped
+
+telling it that we are going to read in a zipped vcf file when we put "--gzvcf"
+
+```
+vcftools --gzvcf SSW_byind.txt.vcf.gz
+```
+shows that there are 22 individuals and 7485987 SNPs
+
+now we are running the same filters that we did last time except now we apply it to this new merged file
+
+```
+vcftools --gzvcf SSW_byind.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8  
+```
+now we have 5565 SNPs (better then last time where we had about 1,000)
+these are the really good, high quality, you can probably trust them data
+
+I went and checked that the file was in my home directory:
+
+```
+cd ~/
+```
+its there!
+
+now we are going to zip up that file
+
+```
+gzip SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf
+ll
+```
+Its there and its red so that means its zipped 
+
+Now we will run a test for hardy winberg equilibrium to see how they are behaving...(?)
+
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.gz --hardy
+```
+
+Ran really fast; 
+
+```
+ll
+```
+
+You will see two new files with "out"; interesting stuff is in "out.hwe" thats where your test stats are for hardy winberg
+
+Take a look at that file:
+
+```
+head out.hwe
+```
+
+Not very easy to read
+therefore we will open in R (open R on terminal)
+
+```
+R
+```
+
+read file into R by doing the following:
+
+```
+hwe <- read.table("out.hwe", header=T)
+```
+
+can look at structure of the data by running the following:
+
+```
+str(hwe)
+```
+
+last three lines show the p values
+P_HWE (global)
+P_DEFICIT (less heterozygotes;inbreeding)
+P_EXCESS (extra heterozygotes)
+Lets get some info on those P values by doing:
+
+```
+summary(hwe)
+```
+
+we want to know the SNPs that show significatin deviation from HWE
+start with DEFICIT
+
+```
+which(hwe$P_HET_DEFICIT<0.01)
+```
+
+This shows us which rows of HWE deficit are less then 0.01 p value
+NOTE: left of $ is data frame right of $ is column you want to investigate
+It outputs row numbers (ie 1001 is a row number 1021 is another row number...)
+
+Vcftools looks at what is significantly different from the expected (i think...)
+
+Now we can add more to the which command to get the data in those rows (ie which transcript etc)
+
+```
+hwe[which(hwe$P_HET_DEFICIT<0.01),]
+```
+
+this will print all of the rows that show a deficit at the condtions we laid out; print JUST those rows and all the columns (since we left that blank)
+
+You notice that there are three Snps in the same gene (same transcript) that affect that allele (makes sense since they are linked)
+When looking at the long title (see below) the c27 is a gene (sometimes mentioned as a transcript)
+
+```
+TRINITY_DN45155_c27_g2_TRINITY_DN45155_c27_g2_i2_g.18743_m.18743 
+```
+
+**What we just did (bringing stuff in/out of R to work with) we should get comfortable with
+
+exit R:
+
+```
+quit ()
+```
+
+Now we are going to takke a more in-depth look at the diversity hidden within these sea star data
+We will start by calculating allele frequency
+in order to do comparisons within groups you have to tell it how individuals assigin to each group:
+you need a set of input files
+files need to have sample IDs and they have to be exactly the same sample IDs used in each file
+have a file called "sick.txt" that has all the sick sample IDs and a file called "healthy.txt" with all the healthy individual sample IDs
+we decided to put SS and HS in sick.txt and put HH in healthy.txt (leave MM out for now)
+
+Go to where the health location file is that Steve made and then we will seperate them 
+
+```
+cd /data/project_data/snps
+ll
+cd reads2snps
+ll
+```
+
+look at the SSW_H...
+
+```
+(FILE NAME HERE)
+```
+This file has:
+	individual number
+	health status (HH, HS, SS, MM)
+	Location (INT, SUB)
+	SNPs (Y or N)
+
+How can we grab certain columns in this file and export (will take other stuff on line as well; ind location etc)
+
+```
+grep "HH" ssw_healthloc.txt >~/H_onesampleperind.txt 
+grep "SS" ssw_healthloc.txt >~/S_onesampleperind.txt
+```
+
+Now we want to add HS to the end of the H_onesampleperind.txt file so we do this:
+
+```
+grep "HS" ssw_healthloc.txt >>~/H_onesampleperind.txt
+```
+
+Now lets go check that the file is there and open it up to see if everything we want is in there
+
+```
+ cd ~/
+ ll
+ cat H_onesampleperind.txt
+```
+
+we need to trim some stuff we don't need right now out of the file:
+
+```
+cut -f 1 H_onesampleperind.txt >H_onesampleperind_trim.txt
+```
+
+this will output it to a new file (since I put a new name after the >)
+go and look at file:
+
+```
+ll
+cat H_onesampleperind_trim.txt
+```
+
+Good its only the individual ID
+
+now do it for the sick:
+
+```
+cut -f 1 S_onesampleperind.txt >S_onesampleperind_trim.txt
+ll
+cat S_onesampleperind_trim.txt
+```
+
+Good; now we are going to use these files to calc allele frequency 
+
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.gz --freq2 --keep H_onesampleperind_trim.txt --out H_AlleleFreqs
+```
+
+Says its only keeping 11 out of 22 individuals...suppose to only keep 6...
+Oops I accidentally added the HS to my Healthy file when they should go in the sick file...
+I'm going to go in manually and delete the HS ind from my file and add them to the sick file
+
+```
+vim H_onesampleperind_trim.txt
+i
+manually deleted HS
+esc
+:wq
+```
+
+now add the HS
+
+```
+vim S_onesampleperind_trim.txt
+i 
+manuall add the HS 
+esc 
+:wq
+cat S_onesampleperind_trim.txt
+```
+
+rerun command that calculates allele freq:
+
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.gz --freq2 --keep H_onesampleperind_trim.txt --out H_AlleleFreqs
+```
+
+YAY! it only kept 6 individuals this time which is what we should have
+Now we need to run it for sick:
+
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.gz --freq2 --keep S_onesampleperind_trim.txt --out S_AlleleFreqs
+```
+
+it kept 14 individauls ...is that what we should have?
+
+We need to go into the file it output to change the column header {Freq} to two column headers called "MAJOR" and "MINOR"
+
+```
+vim S_AlleleFreqs.frq
+i 
+delete {Freq} 
+add MAJOR (tab) MINOR 
+esc 
+:wq 
+```
+
+do the same to healthy:
+
+```
+vim H_AlleleFreqs.frq
+i 
+delete {Freq} 
+add MAJOR (tab) MINOR 
+esc 
+:wq 
+```
+
+Thats it for today
+
+
+  X
+{Freq}
+MAJOR (tab) MINOR
 
 ------
 
 <div id='id-section16'/> 
 
-### Page 16:  
+### Page 16: Notes from command practice in class 2017-03-20;  
+
+Commands notes from 3-20-17
+1) FINAL VCF data -> filter -> output to HD
+2) estimate allele frequency differnece between all H and S SNPs
+f(H) - f(S)
+2b) FST. between H and S  -> output to local machine -> output to R
+3) estimate pie at synon, non snynom, pie nonsyn/pie syn -> output to local machine compare to Romiguirer (life history analysis paper; lost of species)
+
+
+Start Coding (going to go fast today):
+
+We have all 
+```
+$ cd /data/project_data/snps/reads2snps
+$ vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8  
+$ cd ~/
+$ gzip SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf 
+```
+creating a text file with ids for just H and just S
+```
+cd /data/project_data/snps/reads2snps/
+cat ssw_healthloc.txt
+```
+going to grab (grep) any HH and only take (cut) the first column; automatical outputs to home directory
+```
+grep "HH" ssw_healthloc.txt | cut -f1 >~/H_SampleIDs.txt
+```
+Lets check its there and that there are only 8 file names:
+```
+cd ~/
+ll
+cat H_SampleIDs.txt
+```
+Yup! only 8 =)
+
+We could also use wc (word count); will count # of rows and # of characters in a file:
+
+Now do same for sick individuals (remember we need BOTH HS and SS):
+```
+cd /data/project_data/snps/reads2snps/
+grep "HS\|SS" ssw_healthloc.txt | cut -f1 >~/S_SampleIDs.txt
+```
+Now go and check that there are 14 individuals
+```
+cd ~/
+ll
+cat S_SampleIDs.txt
+```
+Yup!  We are good to go 
+
+
+Now we should have everything we need to estimate the frequency of alleles for each SNP (do first for H then for S)
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf.gz --freq2 --keep H_SampleIDs.txt --out H_AlleleFreqs
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf.gz --freq2 --keep S_SampleIDs.txt --out S_AlleleFreqs
+```
+Now calc Fst between H and S:
+```
+vcftools --gzvcf SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf.gz --weir-fst-pop H_SampleIDs.txt --weir-fst-pop S_SampleIDs.txt --out HvS_Fst
+```
+downloading all 3 new results files onto your computer using winScp
+```
+fst file (HvS_Fst.weir.fst) and frequency files (H_AlleleFreqs.frq; S_AlleleFreqs.frq)
+```
+We have to edit the header in the frq files before we open these files in R:
+```
+DELETE:   {Freq}
+REPLACE with:   H_REF  H_ALT
+```
+Make sure you do this for BOTH H and S frq files 
+
+Now open R Studio (on desktop):
+
+set working directory to the folder where you saved your files 
+
+The following is the script they wanted us to copy and paste into R with a few edits I added from notes during class (can be found on the tutorial for 3-6-17):
+
+```
+# List the files in this directory -- you should see your results output from VCFTools if the download was successful
+list.files()
+​
+# Let's do the allele freq comparisons first:
+# this reads in each file; run one at a time
+H_freq <- read.table("H_AlleleFreqs.frq", header=T)
+S_freq <- read.table("S_AlleleFreqs.frq", header=T)
+​
+#look at structure of file:
+
+str(H_freq)
+
+# Since these files have identical numbers of SNPs in the exact same order, we can concatenate them together into one large dataframe:
+All_freq <- merge(H_freq, S_freq, by=c("CHROM", "POS"))
+​
+# Check the results of your merge to make sure things look OK
+str(All_freq) # shows the structure of the data
+head(All_freq)
+​
+# Looks good, now let's calculate the difference in minor allele frequency at each SNP and plot as a histogram
+#Since we merged the file we can now calc allele freq but subtracting the S column from the H column (see below)
+All_freq$diff <- (All_freq$H_ALT - All_freq$S_ALT)
+​
+#now we will make a histogram to look at this data:
+hist(All_freq$diff, breaks=50, col="red", main= "Allele frequency difference (H-S)")
+​
+# Looks like most loci show little difference (i.e., likely drift), but perhaps a few show very large differences between healthy and sick (drift or selection?)
+​
+# How do these highly divergent frequenices compare to Fst at the same SNPs?
+fst <- read.table("HvS_Fst.weir.fst", header=T)
+​
+All_freq.fst <- merge(All_freq, fst, by=c("CHROM", "POS"))
+​
+plot(All_freq.fst$diff, All_freq.fst$WEIR_AND_COCKERHAM_FST, xlab="Allele frequency difference (H-S)", ylab="Fst", main="Healthy vs. Sick SNP divergence")
+​
+#in the plot the (-) individuals are sick and (+) are healthy (because we subtracted S from H)
+# the "outlier" dots (top right and top left) are the ones we would be interested in looking closer at (Like in a volcano plot)
+
+# Which are the genes that are showing the highest divergence between Healthy and Sick?
+#will output the species genes; I think we get about 8 genes here
+All_freq.fst[which(All_freq.fst$WEIR_AND_COCKERHAM_FST>0.2),]
+
+#lets say we have a particular gene we want to look at:
+All_freq.fst[which(All_freq.fst$CHROM=="TRINITY_DN42225_c1_g1_TRINITY_DN42225_c1_g1_i1_g.12458_m.12458"),]
+
+#output 7 rows which means there are 7 SNPs on this particular transcript
+#lets look at one particular SNP and where it likes on the plot.
+#to do so we will add to the existing plot instead of making a new plot; we will do so using the x and y coordinites since we know it y=fst, x=diff, bg=background color, col=color of point, cex=modifies size of point cex=2 means twice as big)
+
+points(0.2500000, 0.2415350, col="red", cex=5)
+
+```
+
+
 
 ------
 
 <div id='id-section17'/> 
 
-### Page 17:  
+### Page 17: Notes from command practice in class 2017-03-22;  
+
+Todays plan:
+
+1. start estimation of pie S and pie N
+2. Compare our diversity data to Romiguier et al. 
+   * estimate Ne
+3. Begin investigating population structure
+   * PCA
+   * ADMIXTURE
+
+Starting by looking at nucleotide diversity at syn sitess (pieS) and the ration of piN/piS)
+
+
+Open putty:
+```
+cd /data/project_data/snps/reads2snps
+head SSW_by24inds.txt.fas
+tail SSW_by24inds.txt.fas
+```
+All the Ns mean...
+
+The next command will take ~5hrs so we will have it running in the background:
+
+```
+screen
+/data/popgen/dNdSpiNpiS_1.0 -alignment_file=SSW_by24inds.txt.fas -ingroup=sp -out=~/dNdSpiNpiS_output
+```
+
+The last command calls the program that we will use, tell it what file to use, "ingroup=sp" means we only have 1 species (no outgroup), out is what we want to save the file as
+
+Now we need to detach from the screen
+```
+Ctrl+A+D
+```
+To get back into the the screen:
+```
+screen -r 
+```
+
+While we wait we can look at an example of the file that will be output (this example is from running one individual)
+```
+cat SSW_bamlist.txt.sum
+```
+Interpreting this file:
+
+* High vaulues mean more homozygosity (vary from 0-1) 
+* we have low values so it means they are probably randomly mating 
+* these results also indicate we probably wont see _____(AHHHH what did he say??!?!)
+* we have much less diversity of nonsyn mutations (means purifying selection)
+* higher value of pin/pis ratio means selection isn't as effective at eliminating nonsynon mutations that are deleterious
+* in small pops that aren't divers that have a hard time elminiating deleterious mutations
+* high for vertebrates
+* low for bacteria and invertibrates with huge pop sizes
+
+Record the following for our samples:
+```
+piS: 0.00585312 [0.005172; 0.006598]
+piN: 0.00154546 [0.00133; 0.001782]
+ave. piN/piS: 0.264041 [0.223914; 0.310575]
+```
+
+Grab the following file and move to desktop:
+```
+/data/project_data/snps/reads2snps/Romiguier_nature13685-s3.csv
+```
+Open R and set working directory:
+```
+setwd("C:/Users/Hannah/Desktop/files for class 3-20")
+```
+
+Check the folder to make sure you are in the right place:
+```
+list.files()
+```
+
+now read in the romiguier file:
+```
+Rom <- read.csv("Romiguier_nature13685-s3.csv", header=T)
+```
+Check that it read in ok:
+```
+str(Rom) 
+head(Rom)
+```
+*You can also click to open the table from the box in the upper right area
+
+Now lets make a plot (only with their data for now) that shows the purifying selection vs effective pop size
+```
+plot(log(Rom$piS), log(Rom$piNpiS), pch=21, bg="blue", xlab="log Synonymous Nucleotide Diversity (piS)", ylab="log Ratio of Nonysn to Syn Diversity (piN/piS)", main="Purifying Selection vs. Effective Population Size")
+```
+
+you can add points to any plot by using this points command; we will add our values to the plot now:
+```
+points(log(0.00585312), log(0.264041), pch=24, cex=1.5, bg="red") 
+```
+so we added the PiS value and then the piN/piS  then told it what we wanted the point to look at
+
+the sea stars fall in the middle(ish); maybe supprising?  not sure yet
+
+Now we will add a best fit line; this is just using Rom data (not including ours)
+```
+reg <- lm(log(Rom$piNpiS) ~ log(Rom$piS)) # Fits a linear regression
+abline(reg) # adds the regression line to the plot
+```
+
+It would be nice to know which data points are similar species (other echinoderms) to our sea stars 
+```
+echino <- Rom[which(Rom$Phylum=="Echinodermata"),] # subsets the data
+points(log(echino$piS), log(echino$piNpiS), pch=21, bg="red") # adds the points
+```
+They are fairly spread out but there is a cluster around our sea star (this shows that selection is not doing a good job of removing deleterious mutations;low syn nucleotide diversity)
+Lets add a ledgend:
+```
+legend("bottomleft", cex=1, legend=c("Metazoans", "Echinoderms", "P. ochraceus"), pch=c(21,21,24), col=c("blue", "red", "red"))
+```
+
+piS = theta = 4Neu
+
+we can rearange the equation to be:
+
+ne = piS/4u (see onenote for more details)
+
+Now lets calc:
+
+0.00585/(4*4*10-9)=365.625
+
+
+
+
 
 ------
 
 <div id='id-section18'/> 
 
-### Page 18:  
+### Page 18:   
 
 ------
 
