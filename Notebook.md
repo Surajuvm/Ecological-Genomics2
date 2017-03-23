@@ -908,21 +908,11 @@ Melissa will try to improve mapping again by Monday (so we can BLAST)
 
 ## Coding session:
 
-<<<<<<< HEAD
 1) move new data    
 ​	moved all the data from DGE to my desktop by using winSCP to drag and drop   
 ​		stored them in folder on desktop called "DGE data from 2-27"    
 2) DESeq2 (5 models)   
 3) your models   
-
-=======
-1) move new data 
-​	moved all the data from DGE to my desktop by using winSCP to drag and drop
-​		stored them in folder on desktop called "DGE data from 2-27" 
-2) DESeq2 (5 models)
-3) your models
-
-
 
 ## Begin coding
 
@@ -932,10 +922,6 @@ open R (open script in R or double click file to open)
 
 
 ***1st homework:*** setting up differently expression analysis; this will be practice for that   
-
-=======
-***1st homework:*** setting up differently expression analysis; this will be practice for that
-
 
 
 ### Model #1 (TEST EFFECT OF HEALTH CONTROLLING FOR LOCATION); Lines 18-81
