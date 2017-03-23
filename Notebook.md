@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * The notebook is set up with a series of internal links from the table of contents.    
 * All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 * Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-     D* You can document anything you'd like, aside from logging your research activities. For example:
+      D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -951,7 +951,7 @@ Ran commands from line 1-13 all at once
 **Line 8:** look at head of data to check
 
 
-**Line 18: ** dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)    
+**Line 18:** dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)    
 ​	it wants: count daa, col data, and design   
 ​	we created count data and col data files earlier (lines 1-13)  
 ​	*Desgin is important; here we are looking at **health** as the MAIN EFFECT   
@@ -990,15 +990,15 @@ It shows: 12954 (number of genes in transcritome assembly that we mapped to) 77 
 Run lines 35, 36, 38 and 40
 ```
 
-**Line 43: ** sorts by p value so you can look at top 6 significant genes
+**Line 43:** sorts by p value so you can look at top 6 significant genes
 
-**Line 45: ** "# log2 fold change (MAP): health S vs H"  since the S came first it is the "up" one in summary results
+**Line 45:** "# log2 fold change (MAP): health S vs H"  since the S came first it is the "up" one in summary results
 
 ```
 run lines 42, 43, 44
 ```
 
-**Line 73:  ** does a summary of what we just ran (res; aka resutls)
+**Line 73:** does a summary of what we just ran (res; aka resutls)
 shows that LFC going up (sick) has 24 genes that were more highly expresssed in sick vs healthy; and LCF (log fold change) going down (healthy) has 8 
 
 
@@ -1007,9 +1007,9 @@ shows that LFC going up (sick) has 24 genes that were more highly expresssed in 
 
 *Basically this is very simliar to model #1 but we added the new interaction and we are using more cores to process the data (parallel)
 
-**line 86: ** same as line 18 except design has a new interaction added "location:health"
+**line 86:** same as line 18 except design has a new interaction added "location:health"
 
-**line 97: ** "parallel" uses two cores of your computer to run the script (goes faster)
+**line 97:** "parallel" uses two cores of your computer to run the script (goes faster)
 
 ```
 run lines 86-100
@@ -1040,13 +1040,13 @@ can have it show you only significant; "res <- res[order(res$padj> 0.05),]" (som
 
 ### Model #3 (GROUP DESIGNS can be used for contrasts of interest or interactions); lines 147-198
 
-**Line 147: ** set up what groups you want (location, health)
+**Line 147:** set up what groups you want (location, health)
 
-**Line 148: ** desing is "group" lumps all possible groups (for variables that you specificed in the line above) into a group
+**Line 148:** desing is "group" lumps all possible groups (for variables that you specificed in the line above) into a group
 
-**Line 159: ** shows you the groups
+**Line 159:** shows you the groups
 
-**Line 163: ** sets up what groups you want to contrast; here we contrast inter vs sub at various healthy and sick levels
+**Line 163:** sets up what groups you want to contrast; here we contrast inter vs sub at various healthy and sick levels
 
 **Benefit of group; lets you focus on specifc variables (inter vs sub, day, etc)
 
@@ -1067,7 +1067,7 @@ We had completed running model 3 therefore I have to do:
 Start by loading the programs again (run lines 2 and 4)
 
 Looks similar to the other models except:
-​	**Line 204: ** the command is "ddsTS" instead of "dds" and there is no "design" section.  command below for comparison
+​	**Line 204:** the command is "ddsTS" instead of "dds" and there is no "design" section.  command below for comparison
 
 ```
 Model 4: ddsTS <- DESeqDataSetFromMatrix(countData = countData, colData = colData, ~ health + day + health:day)
@@ -1086,7 +1086,7 @@ It said, "Error 'countData' not found"
 I went back and ran lines 6-13
 This time it worked
 
-**Lines 205, 207, and 208:  ** similar to lines 29, 35 and 38
+**Lines 205, 207, and 208:** similar to lines 29, 35 and 38
 
 ```
 run line 205 and 207 and 208
