@@ -675,17 +675,11 @@ screen -r
 **Coding outline:**
 
 1. lab notebook (how to put notes into git hub)
-
 2. SAM files
    1. Extract expression
-
 3. What's going on in the background
 
-   ​
-
-***No class on Monday 2/20***
-
-
+**No class on Monday 2/20**
 
 **Lab Notebook:**
 
@@ -914,11 +908,19 @@ Melissa will try to improve mapping again by Monday (so we can BLAST)
 
 ## Coding session:
 
+<<<<<<< HEAD
 1) move new data    
 ​	moved all the data from DGE to my desktop by using winSCP to drag and drop   
 ​		stored them in folder on desktop called "DGE data from 2-27"    
 2) DESeq2 (5 models)   
 3) your models   
+
+=======
+1) move new data 
+​	moved all the data from DGE to my desktop by using winSCP to drag and drop
+​		stored them in folder on desktop called "DGE data from 2-27" 
+2) DESeq2 (5 models)
+3) your models
 
 
 
@@ -931,12 +933,23 @@ open R (open script in R or double click file to open)
 
 ***1st homework:*** setting up differently expression analysis; this will be practice for that   
 
+=======
+***1st homework:*** setting up differently expression analysis; this will be practice for that
+
+
+
 ### Model #1 (TEST EFFECT OF HEALTH CONTROLLING FOR LOCATION); Lines 18-81
 
 ```
 Ran commands from line 1-13 all at once
 ```
 
+
+**Line 1:** change this to be a directory on your computer   
+
+**Lines 2 and 4** loads programs   
+
+=======
 **Line 1:** change this to be a directory on your computer
 
 **Lines 2 and 4** loads programs
@@ -953,65 +966,81 @@ Ran commands from line 1-13 all at once
 
 **Line 8:** look at head of data to check
 
-**Line 18:** dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)    
 
-* it wants: count daa, col data, and design
+**Line 18:  
+** dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)    
+​	it wants: count daa, col data, and design   
+​	we created count data and col data files earlier (lines 1-13)  
+​	*Desgin is important; here we are looking at **health** as the MAIN EFFECT   
+​	this will test for an effect of the last term while controling for an effect of the other term(s) listed  
+​	We are: testing health while controling for differences in location  
+​	trying to remove variance of location and then testing variance of health   
+​	*if you wanted to test for health in general you can delete location and only type in "health"  
+​	trying to remove variance of location and then testing variance of health   
 
-* we created count data and col data files earlier (lines 1-13)
+***NOTE:*** all plot commands are at the bottom  
+​	at any point you can look at a plot of your data but you will need to change the conditions  
+=======
 
-* Desgin is important; here we are looking at **health** as the MAIN EFFECT
+**Line 18:  
+** dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ location + health)
+​	it wants: count daa, col data, and design
+​	we created count data and col data files earlier (lines 1-13)
+​	*Desgin is important; here we are looking at **health** as the MAIN EFFECT
+​	this will test for an effect of the last term while controling for an effect of the other term(s) listed
+​	We are: testing health while controling for differences in location
+​	trying to remove variance of location and then testing variance of health 
+​	*if you wanted to test for health in general you can delete location and only type in "health"
+​	trying to remove variance of location and then testing variance of health 
 
-* this will test for an effect of the last term while controling for an effect of the other term(s) listed
+***NOTE:*** all plot commands are at the bottom
+​	at any point you can look at a plot of your data but you will need to change the conditions
 
-* We are: testing health while controling for differences in location
-
-* trying to remove variance of location and then testing variance of health
-
-* if you wanted to test for health in general you can delete location and only type in "health"
-
-* trying to remove variance of location and then testing variance of health   
-
-  ​
-
-***NOTE:*** all plot commands are at the bottom of the script; at any point you can look at a plot of your data but you will need to change the conditions  
 
 ```
 Run line 18 then line 26
 ```
 
-Shows 13053 (number of genes in transcriptome assembly that we mapped to) 77 (number of samples)
+shows 13053 (number of genes in transcritome assembly that we mapped to) 77 (number of samples)
 
-**Line 29: ** Says it needs at least 100 reads to make it valid
+
+
+**Line 29:  
+** says it needs at least 100 reads to make it valid
+
+
 
 ```
 Run lines 29 and 30
 ```
 
 It shows: 12954 (number of genes in transcritome assembly that we mapped to) 77 (number of samples)  
+​	Means that about 100 genes (13053-12954) that didn't have any reads  
+​	only losing 100 is much better then our last class assembly   
 
-* Means that about 100 genes (13053-12954) that didn't have any reads  
-
-
-* only losing 100 is much better then our last class assembly   
-
-**Line 35:** This randomly chooses 1200 rows from our 12000 so we can have a smaller set to work with when running the models next  
+**Line 35:  
+** this randomly chooses 1200 rows from our 12000 so we can have a smaller set to work with when running the models next  
 ​	***NOTE:*** THIS IS FOR **PRACTICE ONLY** normally you would want to run all
 
-**Line 38: ** by putitng "H" first we are saying the healthy are the set to which we should compare
+**Line 38:  
+** by putitng "H" first we are saying the healthy are the set to which we should compare
 
 ```
 Run lines 35, 36, 38 and 40
 ```
 
-**Line 43: ** sorts by p value so you can look at top 6 significant genes
+**Line 43:  
+** sorts by p value so you can look at top 6 significant genes
 
-**Line 45: ** "# log2 fold change (MAP): health S vs H"  since the S came first it is the "up" one in summary results
+**Line 45:  
+** "# log2 fold change (MAP): health S vs H"  since the S came first it is the "up" one in summary results
 
 ```
 run lines 42, 43, 44
 ```
 
-**Line 73: ** does a summary of what we just ran (res; aka resutls)
+**Line 73:  
+** does a summary of what we just ran (res; aka resutls)
 shows that LFC going up (sick) has 24 genes that were more highly expresssed in sick vs healthy; and LCF (log fold change) going down (healthy) has 8 
 
 
@@ -1020,18 +1049,19 @@ shows that LFC going up (sick) has 24 genes that were more highly expresssed in 
 
 *Basically this is very simliar to model #1 but we added the new interaction and we are using more cores to process the data (parallel)
 
-**line 86:** same as line 18 except design has a new interaction added "location:health"
+**line 86:  
+** same as line 18 except design has a new interaction added "location:health"
 
-**line 97: ** "parallel" uses two cores of your computer to run the script (goes faster)
+**line 97:  
+** "parallel" uses two cores of your computer to run the script (goes faster)
 
 ```
 run lines 86-100
 ```
 
 gives you "# [1]  "Intercept"           "location_sub_vs_int" "health_S_vs_H"       "locationsub.healthS""  
-
-* just shows locationsub interacting with healthyS but her understanding is it is running all versions of interactions  
-* only showing results names at this point   
+​	just shows locationsub interacting with healthyS but her understanding is it is running all versions of interactions  
+​	only showing results names at this point   
 
 
 
@@ -1047,19 +1077,25 @@ Shows that the more factors you use you might miss picking up certain data; ther
 
 **To save results:** command not in this script but you can look up in tutorial; might also be in 1st version of script
 
-can have it show you only significant; "res <- res[order(res$padj> 0.05),]" (something like that; she will update to include)
+can have it show you only significant; "res 
+<- res[order(res$padj> 
+0.05),]" (something like that; she will update to include
 
 
 
 ### Model #3 (GROUP DESIGNS can be used for contrasts of interest or interactions); lines 147-198
 
-**Line 147: ** set up what groups you want (location, health)
+**Line 147:  
+** set up what groups you want (location, health)
 
-**Line 148: ** desing is "group" lumps all possible groups (for variables that you specificed in the line above) into a group
+**Line 148:  
+** desing is "group" lumps all possible groups (for variables that you specificed in the line above) into a group
 
-**Line 159: ** shows you the groups
+**Line 159:  
+** shows you the groups
 
-**Line 163: ** sets up what groups you want to contrast; here we contrast inter vs sub at various healthy and sick levels
+**Line 163:  
+** sets up what groups you want to contrast; here we contrast inter vs sub at various healthy and sick levels
 
 **Benefit of group; lets you focus on specifc variables (inter vs sub, day, etc)
 
@@ -1067,7 +1103,9 @@ can have it show you only significant; "res <- res[order(res$padj> 0.05),]" (som
 
 <div id='id-section10'/> 
 
-### Page 10:Notes from command practice HOMEWORK 2017-02-28; DESeq models 4-5 in R  
+### Page 10:  
+ Notes from command practice HOMEWORK 2017-02-28; DESeq models 4-5 in R
+
 **HOMEWORK:** Finish running through the DESeq2 script by 3-1-17
 We had completed running model 3 therefore I have to do:
 
@@ -1080,7 +1118,8 @@ We had completed running model 3 therefore I have to do:
 Start by loading the programs again (run lines 2 and 4)
 
 Looks similar to the other models except:
-**Line 204: ** the command is "ddsTS" instead of "dds" and there is no "design" section.  command below for comparison
+​	**Line 204:  
+** the command is "ddsTS" instead of "dds" and there is no "design" section.  command below for comparison
 
 ```
 Model 4: ddsTS <- DESeqDataSetFromMatrix(countData = countData, colData = colData, ~ health + day + health:day)
@@ -1096,12 +1135,11 @@ Run line 204
 ```
 
 It said, "Error 'countData' not found"
-
 I went back and ran lines 6-13
-
 This time it worked
 
-**Lines 205, 207, and 208: ** similar to lines 29, 35 and 38
+**Lines 205, 207, and 208:  
+** similar to lines 29, 35 and 38
 
 ```
 run line 205 and 207 and 208
@@ -1169,8 +1207,7 @@ low counts [2]   : 508, 42%
 seems similar to what she got in the script example.
 
 Take aways:
-
-* I can run these models but I'm not sure what exactly they just did. (will ask quesstions in class)
+​	I can run these models but I'm not sure what exactly they just did. (will ask quesstions in class)
 
 
 
