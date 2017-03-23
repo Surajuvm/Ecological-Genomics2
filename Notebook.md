@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-        D* You can document anything you'd like, aside from logging your research activities. For example:
+         D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -2155,7 +2155,7 @@ Now back to making plots:
 
 <div id='id-section15'/> 
 
-### Page 15: Notes from command practice in class 2017-03-08;  
+### Page 15: Notes from command practice in class 2017-03-08; vcftools  
 
 Steve merged all data for each individual into one file and called snps for each of the merged files
 
@@ -2435,7 +2435,7 @@ MAJOR (tab) MINOR
 
 <div id='id-section16'/> 
 
-### Page 16: Notes from command practice in class 2017-03-20;  
+### Page 16: Notes from command practice in class 2017-03-20; pop gen  
 
 Commands notes from 3-20-17
 1) FINAL VCF data -> filter -> output to HD
@@ -2573,7 +2573,7 @@ points(0.2500000, 0.2415350, col="red", cex=5)
 
 <div id='id-section17'/> 
 
-### Page 17: Notes from command practice in class 2017-03-22;  
+### Page 17: Notes from command practice in class 2017-03-22; pop gen continued  
 
 Todays plan:
 
