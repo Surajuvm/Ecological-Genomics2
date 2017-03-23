@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-       D* You can document anything you'd like, aside from logging your research activities. For example:
+        D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -43,13 +43,13 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 8: 2017-02-22](#id-section8). Notes from command practice in class 2017-02-22; working in R
 * [Page 9: 2017-02-27](#id-section9). Notes from command practice in class 2017-02-27; DESeq models 1-3 in R
 * [Page 10: 2017-02-28](#id-section10). Notes from command practice HOMEWORK 2017-02-28; DESeq models 4-5 in R
-* [Page 11:](#id-section11).
-* [Page 12:](#id-section12).
-* [Page 13:](#id-section13).
-* [Page 14:](#id-section14).
-* [Page 15:](#id-section15).
-* [Page 16:](#id-section16).
-* [Page 17:](#id-section17).
+* [Page 11: 2017-03-01](#id-section11). Notes from command practice in class 2017-03-01; WGCNA
+* [Page 12: 2017-03-06](#id-section12). Notes from command practice in class 2017-03-06; SNPs
+* [Page 13: 2017-03-06](#id-section13). Notes from meeting with Steve 2017-03-06; HW2
+* [Page 14: 2017-03-08](#id-section14). Script for Homework #2; 2017-03-08
+* [Page 15: 2017-03-08](#id-section15). Notes from command practice in class 2017-03-08; vcftools
+* [Page 16: 2017-03-20](#id-section16). Notes from command practice in class 2017-03-20; pop gen
+* [Page 17: 2017-03-22](#id-section17). Notes from command practice in class 2017-03-22;  pop gen continued
 * [Page 18:](#id-section18).
 * [Page 19:](#id-section19).
 * [Page 20:](#id-section20).
