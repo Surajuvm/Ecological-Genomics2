@@ -2958,8 +2958,7 @@ disease.dapc
 Now we will take the dapc data and plot it; we will use a scatter plot:
 ```
 scatter.dapc(disease.dapc, grp=gl1$other$Trajectory, legend=T)
-```
-shows all three DA (Discriminant analyses) in the bottom right bar graph style shaded box but it ploted only 1 and 2 (the horizontal and vertical lines that form a "+" in your figure)
+```shows all three DA (Discriminant analyses) in the bottom right bar graph style shaded box but it ploted only 1 and 2 (the horizontal and vertical lines that form a "+" in your figure)
 
 We can also show the data as a stacked bar graph
 * this helps us to see the probablity for each health status that dacp calculated for each individaul
@@ -2991,7 +2990,7 @@ Today:
 * Theory   
 * analysis   
 * plotting   
-  3) Homework #3 discussion   
+3) Homework #3 discussion   
 
 Main goal:   
 * See onenote for detailed explination    
