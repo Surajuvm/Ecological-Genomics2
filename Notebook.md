@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-          D* You can document anything you'd like, aside from logging your research activities. For example:
+           D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -51,7 +51,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 16: 2017-03-20](#id-section16). Notes from command practice in class 2017-03-20; pop gen
 * [Page 17: 2017-03-22](#id-section17). Notes from command practice in class 2017-03-22;  pop gen continued
 * [Page 18: 2017-03-27](#id-section18). Notes from class commands 2017-03-27 (Self guided +notes from mtg w/Steve; PCA and DAPC
-* [Page 19:](#id-section19).
+* [Page 19: 2017-03-29](#id-section19). Notes from class commands 2017-03-29; ADMIXTURE
 * [Page 20:](#id-section20).
 * [Page 21:](#id-section21).
 * [Page 22:](#id-section22).
@@ -2981,7 +2981,183 @@ loadingplot(abs(disease.dapc$var.load),
 
 <div id='id-section19'/> 
 
-### Page 19:  
+### Page 19: Notes from class commands 2017-03-29; ADMIXTURE  
+
+Admixture analysis:   
+
+Today:   
+1) PCA/DAPC Questions?   
+2) Admixture    
+* Theory   
+* analysis   
+* plotting   
+  3) Homework #3 discussion   
+
+Main goal:   
+* See onenote for detailed explination    
+
+We will need 4 files:   
+* the input data file in vcf format   
+* a text file with sample IDs and the population designations   
+* a settings file (.spid) that tells PGDSpider how to process the data   
+* a bash script that runs the program with all the above settings specified   
+
+More specifically:   
+
+```   
+/data/project_data/snps/reads2snps/SSW_tidal.pops   
+/data/project_data/snps/reads2snps/vcf2admixture_SSW.spid   
+/data/project_data/snps/reads2snps/vcf2geno.sh   
+```
+
+Look at the SSW_tidal.pops file   
+
+```   
+cat SSW_tidal.pops   
+```
+
+look at the vcf2admixture_SSW.spid   
+
+```   
+vim vcf2admixture_SSW.spid   
+```
+
+The writer_format is the format it will output the file as.  It is set to what we want    
+
+Next we want to copy to the home directory these files:   
+
+```   
+cp SSW_tidal.pops ~/   
+cp vcf2admixture_SSW.spid ~/   
+cp vcf2geno.sh ~/    
+```
+
+Go check that they are there and that they are unzipped:   
+
+```   
+cd ~/   
+```
+
+All there and already unzipped =)   
+
+Use vim to open up the vcf2geno.sh   
+
+```   
+vim vcf2geno.sh    
+```
+
+a bash script lets you write commands like you would in a command line but it lets you store them.   
+
+It will run then in order one at a time     
+
+It has 2 functions:   
+1) reproducable science (helps you remember and share what you did)   
+2) you can have it run in the background while you do other things   
+
+EVERY single bash script needs this line:   
+
+```   
+#!/bin/bash   
+```
+
+Next it tells you what language its in (java)   
+then it says where your file is    
+"-jar" name of the program you want to run    
+"-inputfile" is what you will rename YOUR file as    
+"-inputformat" what type of file it is (VCF for us)   
+"-outputfile" what your output file will be called; Steve recommends that you name it the same as your info except it will have the ".geon" at the end   
+"-outputformat" what format you want the output in (we want EIGENSOFT)   
+"-spid" telling it to use the spid file because that is where you put all the settings you want to use    
+
+Now edit the file to match your file names    
+
+```   
+i #allows you to edit    
+# change the inputfile name   
+# change the output file name    
+# when done hit "esc" then   
+:wq #to save and quit   
+```
+
+Once done you can run the file:   
+
+```   
+bash vcf2geno.sh   
+```
+
+Once done running you can look at the output file:   
+
+```   
+vim SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf.geno    
+```
+
+It will show a bunch of numbers (0, 1, 2, 9) which is what we expect    
+
+It tells the computer how to interpret the lines that follow   
+
+Now we have the input file we need to run admixture   
+
+we want to run it for a variety of K values    
+* we get to choose how many Ks we want to look at    
+* K of 1-10 is a good place to start (5-10 is pretty good)   
+
+Since we want to run a few we have a script to use; copy that script to our home directory:   
+
+```   
+cd /data/project_data/snps/reads2snps   
+ll    
+cp ADMIX.sh ~/   
+```
+
+Make sure its there then open the file:   
+
+```   
+cd ~/   
+ll   
+vim ADMIX.sh   
+```
+
+Breaking this down:   
+
+```   
+admixture -C 0.000001 --cv ./SSW_all_biallelic.MAF0.02.Miss1.0.recode.vcf.geno $K \   
+| tee log${K}.out   
+```
+
+-C (see onenote for more detail) it is the point where it reaches the maximum likelihood   
+tee: take everything you would have printed to screen and send it to this file instead    
+
+```   
+grep CV log*.out >chooseK.txt   
+```
+
+use grep to search within each file to a chooseK.txt file (lets us focus on the valuess of K that minimize the cross validation)   
+
+Now run the command:   
+
+```   
+bash ADMIX.sh    
+```
+
+Once its done running you can open the "chooseK.txt" file   
+
+```   
+cat choosek.txt    
+```
+We can tell that K=1 is the best model because is had the lowest value of error rate (the value listed ater (k=10): ____)   
+Second best is K=10 which is kind of interesting...to try to figure out why we ran it again but we are now looking at K from 1-20 (instead of 1-10)   
+
+
+
+Homework:   
+take tools you learned and re-apply them with different filtering strategies    
+
+We defined the following filtering straties in class:   
+--min-alleles 2   
+--max-alleles 2   
+--max-missing 0.8   
+--recode   
+--out filename   
 
 ------
 
