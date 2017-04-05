@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-           D* You can document anything you'd like, aside from logging your research activities. For example:
+            D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -3169,7 +3169,503 @@ We defined the following filtering straties in class:
 
 <div id='id-section21'/> 
 
-### Page 21:  
+### Page 21: Script for Homework 3; vcftools and PCA plots  
+
+
+
+### VCFtools code:
+
+Code from 3-31-17
+
+```
+cd /data/project_data/snps/reads2snps
+```
+we want the latest version of this file:
+
+```
+SSW_by24inds.txt.vcf.gz
+```
+
+Its zipped so we need to tell it that we are going to read in a zipped vcf file when we put "--gzvcf"
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz
+```
+
+shows that there are 24 individuals and 7,486,938 SNPs
+
+Now is when I will start playing with the filters.  I want to keep eye on how each filter changes the SNP# so I will test one filter at time (keeping all the other filters set to what we had them at in class).  
+I will start by testing the **'min-alleles'** filter
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 1 --max-alleles 2 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.mina1.MAF0.02.Miss0.8_HW3 
+```
+
+After changing the 'min-alleles 1' we have 5,317 SNPs left (Thats 7,481,621 SNPs that were cut)
+
+Lets see if the same thing happens when I change the **'max-alleles'** to 1
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --max-alleles 1 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.maxa1.MAF0.02.Miss0.8_HW3 
+```
+
+HA! Now there are 0 SNPs that are left
+
+Moving on, lets just try setting the max to a higher number 
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --max-alleles 4 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.maxa4.MAF0.02.Miss0.8_HW3 
+```
+
+There are 5366  SNPs left (so similar to the min-alleles 1 filter)
+
+The previous command did NOT have a min-alleles filter so I'll try it again with 'min-alleles 2'
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 4 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.maxa4.MAF0.02.Miss0.8_HW3 
+```
+
+Adding the 'min-alleles 2' filter did not change the number of SNPs that were kept (5366) (at least it didn't not change things this time)
+
+To wrap up looking at min and max allele filters we will run the original version of the command which has min and max set to 2.
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8_HW3 
+```
+The original filters kept 5,317 SNPs (same as when min-alleles was set to 1)
+
+
+
+OK moving on to test different filters 
+
+Next we will test the **'maf'** (minor allele frequency) filter
+According to the vcf manual *Allele frequency* is defined as the number of times an allele appears over all individuals at that site, divided by the total number of non-missing alleles at that site.
+a typical maf filter is 0.01; the higher end of this filter is around 0.05
+few loci get to be "common" 
+* Setting a high threshold for this filter allows you to only look at common SNPs 
+
+I will try a lower (0.01) higher (0.05) filter and see what happens
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.01 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.MAF0.01.Miss0.8_HW3 
+```
+
+It kept 5,317 SNPs (same as class set filter)
+
+Now lets try the higher threshold:
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.05 --max-missing 0.8 --recode --out ~/SSW_all_biallelic.MAF0.05.Miss0.8_HW3 
+```
+
+The 0.05 threshold retained only 1,899 SNPs 
+
+NOW lets try the **'max-missing'** filter:
+According to the VCFtools manual this filter: "Exclude sites on the basis of the proportion of missing data (defined to be between 0 and 1, where 0 allows sites that are completely missing and 1 indicates no missing data allowed)."
+
+First we can try seeing what it would be like if we were very lax (aka if we set max-missing to 0 which allows for missing data):
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0_HW3 
+```
+
+This filter kept 56,120 SNPs
+
+Now lets try the opposite extream; NO missing data allowed
+
+max-missing 1
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 1 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss1_HW3 
+```
+
+Now we only have 1,494 SNPs left 
+
+Lets see if we can find a good inbetween for this filter.  We will start with 0.5
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.5 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.5_HW3 
+```
+
+With this filter we ended up with 15,301 SNPs
+
+
+***At this point I took a break and came back later to test more filters***
+
+
+Now I will increase the max-missing filter by 0.1 to see what happens at each level. 
+
+max-missing 0.6
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.6 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.6_HW3
+```
+
+10,906 SNPs
+
+**************Paused here; picked up below on 4/3****************
+
+First we have to get back to the correct location to run commands:   
+
+```
+cd /data/project_data/snps/reads2snps
+```
+Now we can contiue our max missing gradient:
+
+Max-missing 0.7
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.7 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.7_HW3
+```
+
+8452 SNPs
+
+max-missing 0.9 (0.8 was used in class) 
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.9 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.9_HW3
+```
+
+3371  SNPs
+
+
+NEXT FILTER: we will test the "minDP" filter which looks at read depth
+* low value 5
+* high value >100; Start having reads from paralogus genomes matching to copies. 
+
+We will start with the low threshold and work our way up to see what happens 
+
+minDP = 5
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --minDP 5 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minDP5_HW3
+```
+
+5317  SNPs
+
+minDP 50
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --minDP 50 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minDP50_HW3
+```
+
+5317  SNPs
+
+
+minDP 100
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --minDP 100 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minDP5100_HW3
+```
+
+5317 SNPs
+
+
+minDP 200
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --minDP 200 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minDP200_HW3
+```
+
+5317 SNPs
+
+....Interesting.  There was no change in the number of SNPs called  for any of these filters.  Either I did something wrong or there was no effect of minDP on our dataset
+
+
+NEXT FILTER: hwe
+* This tests removes data that deviated from the random mating equilibrium
+  * i.e. hwe 0.01 rejects any SNPs that violate the random mating equilibrium at 0.01
+
+We will start with 0.01 and go from there 
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --hwe 0.01 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minhwe0.01_HW3
+```
+
+5301  SNPs 
+Alright so this threshold didn't change the # of SNPs too drastically so I'll try values lower and higher then this one:
+
+hwe 0.001
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --hwe 0.001 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minhwe0.001_HW3
+```
+
+5311  SNPs 
+
+
+hwe 0.1
+
+```
+vcftools --gzvcf SSW_by24inds.txt.vcf.gz --min-alleles 2 --max-alleles 2 --maf 0.02 --max-missing 0.8 --hwe 0.1 --recode --out ~/SSW_all_biallelic.MAF0.02.Miss0.8minhwe0.1_HW3
+```
+
+5161   SNPs 
+
+
+Summary:
+
+- Min-alleles
+  - 1 (5,317 SNPs)
+  - 2 (5,317 SNPs; filter used in class)
+
+- Max-alleles
+  - 1 (0 SNPs)
+  - 2 (5,317 SNPs; filter used in class)
+  - 4 (5,366 SNPs)
+
+- maf 
+  - 0.1 (5,317 SNPs)
+  - 0.5 (1,899 SNPs)
+  - 0.2 (5,317 SNPs; filter used in class)
+
+- max-missing 
+  - 0 (56,120 SNPs)
+  - 1 (1,494 SNPs)
+  - 0.5 (15,301 SNPs)
+  - 0.6 (10,906 SNPs)
+  - 0.7 (8,452 SNPs)
+  - 0.8 (5,317 SNPs; filter used in class)
+  - 0.9 (3,371 SNPs)
+
+- minDP
+  - 5 (5,317 SNPs)
+  - 50 (5,317 SNPs)
+  - 100 (5,317 SNPs)
+  - 200 (5,317 SNPs)
+
+- hwe 
+  - 0.01 (5,301 SNPs)
+  - 0.001 (5,311 SNPs)
+  - 0.1 (5,161 SNPs)
+
+
+  ​
+### BELOW STARTS THE SCRIPT FOR PCA PLOT GENERATION
+
+```
+#Script from class modified for homework 3
+# Set your working directory to where you downloaded your results files:
+#setwd("~/github/PBIO381_srkeller_labnotebook/data/SNP_data/")
+
+list.files() # Do you see your downloaded files there? If not, double check to make sure you've set your working directory to the right spot
+
+# We'll need to install 2 packages to work with the SNP data:
+#install.packages("vcfR") # reads in vcf files and proides tools for file conversion 
+#install.packages("adegenet") # pop-genetics package with some handy routines, including PCA and other multivariate methods (DAPC)
+
+# ...and load the libraries
+library(adegenet)
+library(vcfR)
+
+#Read the vcf SNP data into R
+download.file("https://raw.githubusercontent.com/stephenrkeller/PBIO381_srkeller_labnotebook/master/data/SNP_data/SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf",dest="test.vcf")
+
+vcf1<-read.vcfR("test.vcf")
+vcf1 <- read.vcfR("SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf")
+
+# The adegenet package uses a highly efficient way of storing large SNP datasets in R called a "genlight" object. The following function creates a genlight object from your vcf:
+gl1 <- vcfR2genlight(vcf1)
+print(gl1) # Looks good! Right # of SNPs and individuals!
+
+# For info, try:
+gl1$ind.names
+gl1$loc.names[1:10]
+
+# Notice there's nothing in the field that says "pop"? Let's fix that...
+ssw_meta <- read.table("ssw_healthloc.txt", header=T) # read in the metadata
+ssw_meta <- ssw_meta[order(ssw_meta$Individual),] # sort it by Individual ID
+
+# Confirm the ID's are ordered the same in gl1 and ssw_meta:
+gl1$ind.names
+ssw_meta$Individual
+
+gl1$pop <- ssw_meta$Location # assign locality info
+gl1$other <- as.list(ssw_meta$Trajectory) # assign disease status
+
+
+# WE can explore the structure of our SNP data using the glPlot function, which gives us a sample x SNP view of the VCF file
+glPlot(gl1, posi="bottomleft")
+
+# Now, let's compute the PCA on the SNP genotypes and plot it:
+pca1 <- glPca(gl1, nf=4, parallel = F)
+pca1 
+
+# Plot the individuals in SNP-PCA space, with locality labels:
+plot(pca1$scores[,1], pca1$scores[,2], 
+     cex=2, pch=20, col=gl1$pop, 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (max-missing 0.8; maf 0.02)")
+legend("topleft", 
+       legend=unique(gl1$pop), 
+       pch=20, 
+       col=c("black", "red"))
+
+# Perhaps we want to show disease status instead of locality:
+plot(pca1$scores[,1], pca1$scores[,2], 
+     cex=2, pch=20, col=as.factor(unlist(gl1$other)), 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (Freq missing=20%; 5317 SNPs)")
+legend("topleft", 
+       legend=unique(as.factor(unlist(gl1$other))), 
+       pch=20, 
+       col=as.factor(unique(unlist(gl1$other))))
+
+# Which SNPs load most strongly on the 1st PC axis?
+loadingplot(abs(pca1$loadings[,1]),
+            threshold=quantile(abs(pca1$loadings), 0.999))
+# Get their locus names
+gl1$loc.names[which(quantile(abs(pca1$loadings))>0.999)]
+
+threshold<-quantile(abs(pca1$loadings),0.999)
+
+gl1$loc.names[which(abs(pca1$loadings)>threshold)]
+
+gl1$loc.names[which(quantile(abs(pca1$loadings),0.999)>0.0770)]
+
+
+
+#Below starts the analysis for the two vcf files I generated for homework
+#Start with PCA2 = max missing 0.9
+
+vcf2 <- read.vcfR("SSW_all_biallelic.MAF0.02.Miss0.9_HW3.recode.vcf")
+
+# The adegenet package uses a highly efficient way of storing large SNP datasets in R called a "genlight" object. The following function creates a genlight object from your vcf:
+gl2 <- vcfR2genlight(vcf2)
+print(gl2) # Looks good! Right # of SNPs and individuals!
+
+# For info, try:
+#gl1$ind.names
+#gl1$loc.names[1:10]
+
+# Notice there's nothing in the field that says "pop"? Let's fix that...
+#ssw_meta <- read.table("ssw_healthloc.txt", header=T) # read in the metadata
+#ssw_meta <- ssw_meta[order(ssw_meta$Individual),] # sort it by Individual ID
+
+# Confirm the ID's are ordered the same in gl1 and ssw_meta:
+gl2$ind.names
+ssw_meta$Individual
+
+gl2$pop <- ssw_meta$Location # assign locality info
+gl2$other <- as.list(ssw_meta$Trajectory) # assign disease status
+
+
+# WE can explore the structure of our SNP data using the glPlot function, which gives us a sample x SNP view of the VCF file
+glPlot(gl2, posi="bottomleft")
+
+# Now, let's compute the PCA on the SNP genotypes and plot it:
+pca2 <- glPca(gl2, nf=4, parallel = F)
+pca2 
+
+# Plot the individuals in SNP-PCA space, with locality labels:
+plot(pca2$scores[,1], pca2$scores[,2], 
+     cex=2, pch=20, col=gl2$pop, 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (max-missing 0.9; maf 0.02)")
+legend("topleft", 
+       legend=unique(gl1$pop), 
+       pch=20, 
+       col=c("black", "red"))
+
+# Perhaps we want to show disease status instead of locality:
+plot(pca2$scores[,1], pca2$scores[,2], 
+     cex=2, pch=20, col=as.factor(unlist(gl2$other)), 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (max-missing 0.9; maf 0.02; 5317 SNPs)")
+legend("topleft", 
+       legend=unique(as.factor(unlist(gl2$other))), 
+       pch=20, 
+       col=as.factor(unique(unlist(gl2$other))))
+
+# Which SNPs load most strongly on the 1st PC axis?
+loadingplot(abs(pca2$loadings[,1]),
+            threshold=quantile(abs(pca2$loadings), 0.999))
+# Get their locus names
+gl2$loc.names[which(quantile(abs(pca2$loadings))>0.999)]
+
+threshold<-quantile(abs(pca2$loadings),0.999)
+
+gl2$loc.names[which(abs(pca2$loadings)>threshold)]
+
+gl2$loc.names[which(quantile(abs(pca2$loadings),0.999)>0.0770)]
+
+
+
+#running the third and final PCA
+#PCA3 = maf 0.05
+
+
+vcf3 <- read.vcfR("SSW_all_biallelic.MAF0.05.Miss0.8_HW3.recode.vcf")
+
+# The adegenet package uses a highly efficient way of storing large SNP datasets in R called a "genlight" object. The following function creates a genlight object from your vcf:
+gl3 <- vcfR2genlight(vcf3)
+print(gl3) # Looks good! Right # of SNPs and individuals!
+
+# For info, try:
+#gl1$ind.names
+#gl1$loc.names[1:10]
+
+# Notice there's nothing in the field that says "pop"? Let's fix that...
+#ssw_meta <- read.table("ssw_healthloc.txt", header=T) # read in the metadata
+#ssw_meta <- ssw_meta[order(ssw_meta$Individual),] # sort it by Individual ID
+
+# Confirm the ID's are ordered the same in gl1 and ssw_meta:
+gl3$ind.names
+ssw_meta$Individual
+
+gl3$pop <- ssw_meta$Location # assign locality info
+gl3$other <- as.list(ssw_meta$Trajectory) # assign disease status
+
+
+# WE can explore the structure of our SNP data using the glPlot function, which gives us a sample x SNP view of the VCF file
+glPlot(gl3, posi="bottomleft")
+
+# Now, let's compute the PCA on the SNP genotypes and plot it:
+pca3 <- glPca(gl3, nf=4, parallel = F)
+pca3 
+
+# Plot the individuals in SNP-PCA space, with locality labels:
+plot(pca3$scores[,1], pca3$scores[,2], 
+     cex=2, pch=20, col=gl3$pop, 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (max-missing 0.8; maf 0.05)")
+legend("topleft", 
+       legend=unique(gl1$pop), 
+       pch=20, 
+       col=c("black", "red"))
+
+# Perhaps we want to show disease status instead of locality:
+plot(pca3$scores[,1], pca3$scores[,2], 
+     cex=2, pch=20, col=as.factor(unlist(gl3$other)), 
+     xlab="Principal Component 1", 
+     ylab="Principal Component 2", 
+     main="PCA on SSW data (Freq missing=20%; 5317 SNPs)")
+legend("topleft", 
+       legend=unique(as.factor(unlist(gl3$other))), 
+       pch=20, 
+       col=as.factor(unique(unlist(gl3$other))))
+
+# Which SNPs load most strongly on the 1st PC axis?
+loadingplot(abs(pca3$loadings[,1]),
+            threshold=quantile(abs(pca3$loadings), 0.999))
+# Get their locus names
+gl3$loc.names[which(quantile(abs(pca3$loadings))>0.999)]
+
+threshold<-quantile(abs(pca3$loadings),0.999)
+
+gl3$loc.names[which(abs(pca3$loadings)>threshold)]
+
+gl3$loc.names[which(quantile(abs(pca3$loadings),0.999)>0.0770)]
+```
+
+
+
+​	
 
 ------
 
