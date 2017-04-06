@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-            D* You can document anything you'd like, aside from logging your research activities. For example:
+             D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -53,7 +53,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 18: 2017-03-27](#id-section18). Notes from class commands 2017-03-27 (Self guided +notes from mtg w/Steve; PCA and DAPC
 * [Page 19: 2017-03-29](#id-section19). Notes from class commands 2017-03-29; ADMIXTURE
 * [Page 20:](#id-section20).
-* [Page 21:](#id-section21).
+* [Page 21: 2017-04-05](#id-section21). Script for Homework 3; vcftools and PCA plots; 2017-04-05
 * [Page 22:](#id-section22).
 * [Page 23:](#id-section23).
 * [Page 24:](#id-section24).
