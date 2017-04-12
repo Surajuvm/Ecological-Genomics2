@@ -56,7 +56,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 21: 2017-04-05](#id-section21). Script for Homework 3; vcftools and PCA plots; 2017-04-05
 * [Page 22: 2017-04-05](#id-section22). Notes from class commands 2017-04-05; Gene annotation and enrichment 
 * [Page 23: 2017-04-10](#id-section23). Notes from class commands 2017-04-10; 16s data analysis (Part 1)
-* [Page 24:](#id-section24).
+* [Page 24: 2017-04-12](#id-section24). Notes from class commands 2017-04-12; 16s data analysis (Part 2)
 * [Page 25:](#id-section25).
 * [Page 26:](#id-section26).
 * [Page 27:](#id-section27).
@@ -4220,7 +4220,107 @@ We had some time in class so we installed it in class
 
 <div id='id-section24'/> 
 
-### Page 24:  
+### Page 24: Notes from class commands 2017-04-12; 16s data analysis (Part 2)  
+
+**Filtering OTU table**   
+
+Last time: created OTU table (with about 93000 OTUs)   
+Today: filter table    
+
+**1) We will filter chimeric sequences**   
+* a combination of 2 (PCR) sequences    
+* not common with larger sequencing sets; more common with amplicon sequencing   
+* done with homology to a data base (green genes); compares    
+* we will use Usearch (free for small data sets, $$$ for larger data sets); Bsearch is basically a copy of Usearch but its free!   
+
+```
+vsearch --uchime_ref /data/project_data/16s/otu_table/rep_set.fna --chimeras ~/16s_analysis/mc2_w_tax_no_pynast_failures_chimeras.fasta --db /usr/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set/97_otus.fasta
+```
+
+-- uchime_ref algorithum that usearch came up with; saying to use this method; searches green genes database to see if first half = this gene second half = this gene therefore its a chimera and it will remove it    
+**ADD NOTES ABOUT THE OTHER PARTS OF THE ABOVE COMMAND    
+-- db is where your database is located    
+
+The above command makes the fasta file with all the chimeras; the next step will remove them    
+
+**2) Remove the chimeric OTUs from our OTU table**   
+
+.py is a python script that contains the commands nessesary to remove the chimera files    
+-i (input) is the OTU table she gave us last class    
+-o (output) the output will go to whereever you run the command to make sure you run this command in the directory you want the data to go (16s_analysis)   
+
+```
+filter_otus_from_otu_table.py -i /data/project_data/16s/otu_table/otu_table_mc2_w_tax_no_pynast_failures.biom -o otu_table_mc2_w_tax_no_pynast_failures_no_chimeras.biom -e ~/16s_analysis/mc2_w_tax_no_pynast_failures_chimeras.fasta
+```
+
+**3) Remove these chimeric OTUs from rep_set_aligned and re-make the phylogenetic tree**   
+
+This command removes the chimeras from the "rep_set_aligned" file:   
+```
+filter_fasta.py -f /data/project_data/16s/otu_table/pynast_aligned_seqs/rep_set_aligned_pfiltered.fasta -o ~/16s_analysis/rep_set_aligned_pfiltered_no_chimeras.fasta -a ~/16s_analysis/mc2_w_tax_no_pynast_failures_chimeras.fasta -n
+```
+
+The next command makes the tree    
+The below command will take a while so run in screen    
+```
+screen 
+make_phylogeny.py -i ~/16s_analysis/rep_set_aligned_pfiltered_no_chimeras.fasta -o ~/16s_analysis/rep_set_no_chimeras.tre
+"Ctrl" a d #gets you out of screen but lets command still run 
+```
+
+
+**Frequency Filtering:** gets rid of low frequency OTUs    
+* will remove OTUs with fewer then 50 total counts across sall samples (–min_count 50)   
+* Will also remove any OTU that is in fewer than 25% of samples (–min_samples 44)   
+
+```
+filter_otus_from_otu_table.py -i otu_table_mc2_w_tax_no_pynast_failures_no_chimeras.biom -o otu_table_mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered.biom --min_count 50 --min_samples 44
+
+##How many OTUs are left?
+biom summarize-table -i otu_table_mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered.biom
+```
+Number of OTUs are now 1064 (num observations)    
+
+This is on par for what is seen in the literature   
+
+Each line is a seperate individual with the number of reads (18000 is the min)   
+
+
+**Core Diversity analyses in QIIME**   
+
+This script runs a number of diversity indicies on your data    
+-o (output) this will be a directory of files which you will move to your desktop so you can look at the files and the webpage it generates   
+-e its a kind of normalization (she has a nice description on the tutorial)   
+* our -e is at 20,000 which means if they have more then 20,000 reads they will pick random samples from that +20,000   
+
+NOTE: we will not run this command because it takes a few days   
+We can click the link in the tutorial to see the webpage it generated when Melanie ran it    
+http://www.uvm.edu/~mlloyd/mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered_core_diversity/    
+* weighted takes into account the...   
+* unweighted takes into account the presence or absence of certain OTU results   
+
+
+```
+core_diversity_analyses.py -o core_diversity_filtered -i otu_table_mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered.biom -m ~/Po/MiSeq/joined/map.txt -t rep_set_no_chimeras.tre -e 20000 -a 8
+```
+
+We will get phyloseq up and running and work through bugs so we can jump right in next time    
+
+***move into R studio***   
+
+You will need: 4 files   
+* otu_table_mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered.biom #in your own 16s_analysis folder   
+* rep_set_no_chimeras.tre #move when done; will be in your own 16s_analysis folder    
+* R_map.txt #in /data/project_data/16s   
+* phyloseq_script.R #in /data/project_data/16s   
+
+Once all the files are moved open the R script in R studio and load the libaries to see if they work (run lines 1-5)   
+
+If everything runs ok then import the OTU table (run lines 8-10)   
+
+NOTE: warnings are normal    
+
+Run all lines 1-40 by the end of class    
 
 ------
 
