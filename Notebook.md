@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-             D* You can document anything you'd like, aside from logging your research activities. For example:
+              D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -3163,7 +3163,164 @@ We defined the following filtering straties in class:
 
 <div id='id-section20'/> 
 
-### Page 20:  
+### Page 20: Notes from class commands 2017-04-03; OutFLANK  
+
+We moved these files from the server to the folder on the desktop that we will use as our working directory in R:   
+
+* SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.geno       
+* SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf      
+* SSW_healthloc.txt        
+
+Go into R and set your working directory   
+
+Then install these packages:   
+
+```   
+install.packages("devtools")   
+install_github("whitlock/OutFLANK")   
+```
+
+Once installed open thse packages plust the following:   
+```   
+library(OutFlank)   
+library(vcfR)   
+library(adegenet)   
+```
+NOTE: Choose to update **all** when asked (for "whitlock/OutFLANK")   
+
+
+Example code for ____   
+```   
+OutFLANK(FstDataFrame, LeftTrimFraction = 0.05, RightTrimFraction = 0.05,
+  Hmin = 0.1, NumberOfSamples, qthreshold = 0.05)
+```
+
+Explination of what each part means according to R    
+
+```
+FstDataFrame	
+A data frame that includes a row for each locus, with columns as follows:
+$LocusName: a character string that uniquely names each locus.
+$FST: Fst calculated for this locus. (Kept here to report the unbased Fst of the results)
+$T1: The numerator of the estimator for Fst (necessary, with $T2, to calculate mean Fst)
+$T2: The denominator of the estimator of Fst
+$FSTNoCorr: Fst calculated for this locus without sample size correction. (Used to find outliers)
+$T1NoCorr: The numerator of the estimator for Fst without sample size correction (necessary, with $T2, to calculate mean Fst)
+$T2NoCorr: The denominator of the estimator of Fst without sample size correction
+$He: The heterozygosity of the locus (used to screen out low heterozygosity loci that have a different distribution)
+$indexOrder: integer index giving the original order of rows in the input file.
+LeftTrimFraction	
+The proportion of loci that are trimmed from the lower end of the range of Fst before the likelihood funciton is applied.
+RightTrimFraction	
+The proportion of loci that are trimmed from the upper end of the range of Fst before the likelihood funciton is applied.
+Hmin	
+The minimum heterozygosity required before including calculations from a locus.
+NumberOfSamples	
+The number of spatial locations included in the data set. **FOR US IT WILL BE THREE; HH HS SS**
+qthreshold	
+The desired false discovery rate threshold for calculating q-values.
+```
+
+
+**This class ran fast and we encountered many errors along the way.  I will paste the completed updated Rscript below (that one that SHOULD work without errors)
+
+
+```
+setwd("C:/Users/Hannah/Desktop/DGE data from 2-27")
+
+# Install Packages
+install.packages("devtools")
+library(devtools)
+source("http://bioconductor.org/biocLite.R")
+biocLite("qvalue")
+install_github("whitlock/OutFLANK")
+
+#Load these packages
+library(OutFLANK)
+library(vcfR)
+library(adegenet)
+
+#Read in your .geno file. OutFlank requires it to be transposed, so we'll so that next. 
+ssw.geno_in <- read.fwf("SSW_all_biallelic.MAF0.02.Miss0.8.recode.vcf.geno", width=rep(1,24))
+
+#transposing
+ssw.geno <- t(ssw.geno_in)
+
+#read in the meta data
+ssw_meta <- read.table("ssw_healthloc.txt",T)  #read in the data
+ssw_meta <- ssw_meta[order(ssw_meta$Individual),] #reorder the meta_data by individual number
+ssw_meta$Trajectory[which(ssw_meta$Trajectory == 'MM')] = NA #Remove the MM's from the analysis (takes the MM and sets it as NA)
+
+#Now we can use OutFLANK
+OF_SNPs <- MakeDiploidFSTMat(ssw.geno, locusNames = seq(1,5317,1), popNames = ssw_meta$Trajectory)
+OF_out <- OutFLANK(FstDataFrame = OF_SNPs, LeftTrimFraction = 0.05, RightTrimFraction = 0.05, Hmin = 0.1, NumberOfSamples = 3, qthreshold = 0.1)
+OutFLANKResultsPlotter(OF_out, withOutliers = T, NoCorr = T, Hmin = 0.1, binwidth = 0.005, titletext = "Scan for local selection")
+outliers <- which(OF_out$results$OutlierFlag=="TRUE")
+outliers 
+
+#We can extract info about the  outliers by reading in the vcf files and looking at the annotations 
+vcf1 <- read.vcfR("SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf") #Read in file
+vcfann <- as.data.frame(getFIX(vcf1)) #Extract annotations from the file
+vcfann[outliers,]
+```
+
+For outliers you should have gotten:   
+
+```
+                                                            CHROM  POS   ID REF ALT QUAL FILTER
+1223 TRINITY_DN46509_c0_g1_TRINITY_DN46509_c0_g1_i1_g.22498_m.22498 1036 <NA>   G   A <NA>   PASS
+1452 TRINITY_DN46269_c0_g1_TRINITY_DN46269_c0_g1_i1_g.21774_m.21774 1242 <NA>   C   T <NA>   PASS
+3067 TRINITY_DN46834_c0_g2_TRINITY_DN46834_c0_g2_i3_g.23511_m.23511  408 <NA>   A   G <NA>   PASS
+3068 TRINITY_DN46834_c0_g2_TRINITY_DN46834_c0_g2_i3_g.23511_m.23511  411 <NA>   G   A <NA>   PASS
+3546 TRINITY_DN43783_c3_g1_TRINITY_DN43783_c3_g1_i6_g.15491_m.15491  110 <NA>   T   C <NA>   PASS
+3602 TRINITY_DN42222_c4_g2_TRINITY_DN42222_c4_g2_i1_g.12455_m.12455   61 <NA>   C   T <NA>   PASS
+4374 TRINITY_DN44735_c6_g1_TRINITY_DN44735_c6_g1_i3_g.17655_m.17655   80 <NA>   C   G <NA>   PASS
+```
+
+
+Now we will go into **Putty** to look at the VCF file, grad the nucleotide line for the outliers we just discovered, and BLAST them    
+
+```
+cd ~/
+vim SSW_all_biallelic.MAF0.02.Miss0.8..recode.vcf
+```
+
+If you only have one vcf file you can tell it to open anything with .vcf by running the following command   
+
+```
+vim *.vcf
+```
+
+Now you want to set no wrap by doing the following:   
+
+```
+(SHIFT) :set nowrap (ENTER)
+```
+
+WRONG!  Don't use the vcf file!  so quit out and go to the correct file    
+
+```
+:q!
+```
+
+Now got to file and vim (open it)    
+
+```
+cd /data/project_data/assembly/
+ll
+vim 08-11-35-36_cl20_longest_orfs_gene.cds
+```
+
+When in the file do the following commands:   
+```
+(SHIFT) :set nowrap
+/(name of outlier you are searching for)
+```
+
+Once it finds the outlier copy the line of nucleotides and BLAST it (in BLASTx)   
+
+USE BLASTx; can also se BLASTp    
+NOTE: some of these will not align to anything    
 
 ------
 
