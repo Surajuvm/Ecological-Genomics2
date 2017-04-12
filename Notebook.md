@@ -52,7 +52,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 17: 2017-03-22](#id-section17). Notes from command practice in class 2017-03-22;  pop gen continued
 * [Page 18: 2017-03-27](#id-section18). Notes from class commands 2017-03-27 (Self guided +notes from mtg w/Steve; PCA and DAPC
 * [Page 19: 2017-03-29](#id-section19). Notes from class commands 2017-03-29; ADMIXTURE
-* [Page 20:](#id-section20).
+* [Page 20: 2017-04-03](#id-section20). Notes from class commands 2017-04-03; OutFLANK
 * [Page 21: 2017-04-05](#id-section21). Script for Homework 3; vcftools and PCA plots; 2017-04-05
 * [Page 22:](#id-section22).
 * [Page 23:](#id-section23).
