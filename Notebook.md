@@ -55,7 +55,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 20: 2017-04-03](#id-section20). Notes from class commands 2017-04-03; OutFLANK
 * [Page 21: 2017-04-05](#id-section21). Script for Homework 3; vcftools and PCA plots; 2017-04-05
 * [Page 22: 2017-04-05](#id-section22). Notes from class commands 2017-04-05; Gene annotation and enrichment 
-* [Page 23:](#id-section23).
+* [Page 23: 2017-04-10](#id-section23). Notes from class commands 2017-04-10; 16s data analysis (Part 1)
 * [Page 24:](#id-section24).
 * [Page 25:](#id-section25).
 * [Page 26:](#id-section26).
@@ -3951,7 +3951,270 @@ Continuous measure of interest: will perform MWU test
 
 <div id='id-section23'/> 
 
-### Page 23:  
+### Page 23: Notes from class commands 2017-04-10; 16s data analysis (Part 1)  
+
+You can find the tutorial to follow along here: https://adnguyen.github.io/2017_Ecological_Genomics/Tutorial/2017-04-10_16sAmipliconSeqData.html     
+
+There were 173 (ish) samples    
+36 sea stars and 6 time points (they didnt' all live all six days)    
+​    
+We should start by making a diretory to store all the files related to this section:    
+
+```
+mkdir 16s_analysis
+cd 16s_analysis
+```
+
+We will use QIIME to make an OTU table     
+
+This program will:    
+1) BLAST your sequences to a reference data based (we will use GreenGenes) to see what it is (if it is annotated)    
+2) Group the ones that don't match to known taxa based on similarities into OTUs    
+​    
+We should be able to call everything in our home directory (and it should call anything it needs from the main directory)    
+
+Mapping file is really imporatant because it takes the file name and give it meaning (it includes all info about the sequences: health status, date collected etc)    
+​    
+NOTE: there are two map files:    
+* map.txt (used for QIIME)    
+* R_map.txt (use for R)    
+
+Go to file for QIIME and open it to look at it:    
+```
+cd /data/project_data/16s 
+vim map.txt
+:set nowrap
+```
+
+Phenotype is if the sample was sick or healthy at time she took the sample     
+the number is how sick it was    
+* 0 =healthy     
+* 1 2 3 4 = diff levels of sick     
+* 5 = dead     
+
+Now we will do something in our home directory:    
+​    
+```
+validate_mapping_file.py -m /data/project_data/16s/map.txt -o validate_map -p -b    
+```
+If you get the following message its ok    
+
+```
+Errors and/or warnings detected in mapping file.  Please check the log and html file for details.
+```
+
+Oops I was supposed to run the above command IN the new directory but i ran it in my general directory so I'll move it:    
+
+```
+mv validate_map/ ~/16s_analysis/
+```
+
+I checked and it was there so we are good to go.    
+
+Now use WINSCP to open and look at the following file:    
+
+```
+map.html 
+```
+
+drag and drop that file to your desktop (or wherever to look at it) and open it in a browser    
+
+It should be a table of that data (I think)    
+
+There are raw data files on the server that we will start working with but then will will skip to the final files because it takes ~4 days to run     
+
+
+These files are in... but we will run the command in our own directory     
+
+You can tell they are paired end samples because they have 2 reads (R1, R2)    
+
+run this command:    
+```
+multiple_join_paired_ends.py -i /data/project_data/16s/data_files -o ~/16s_analysis/joined --read1_indicator _R1 --read2_indicator _R2
+```
+
+Comments in the meantime:    
+
+QIIME is a list of TONS of python scripts    
+* when you install it, it installs everything you need to run each scripts    
+* when you click the script on the website it will tell you what it needs     
+* its been around for a while and there are tons of support (online chat rooms etc)    
+* This is NOT the only program to make an OTU table but it is the easiest to use.     
+
+Reads at this point:    
+- they are straight from sequencing facility     
+- the facility did de multiplex (remove barcodes etc)     
+
+QIIME can do it all:    
+- demultiplex -> creating OTU table     
+
+OK now the command is done running so check your directory to see what it did:    
+​    
+```
+ll #in the 16s_analysis directory 
+```
+
+There is now a "joined" directory     
+go into joined and you should see 1 directory for each sample (all should have _R1 at the end)     
+
+```
+cd joined/
+ll
+```
+YUP! good to go!    
+
+We need the file names in joined to match PERFECTLY to the mapping file so we need to edit the file names to make them match the mapping file     
+We need to:    
+* remove the _ after the first number    
+* remove _R1     
+
+Melanie created python scripts to help remove these:     
+
+So within "joined" directory run these commands one at a time:     
+
+```
+bash /data/project_data/16s/remove-underscore.sh
+bash /data/project_data/16s/remove-R1.sh
+ll 
+```
+Now you can see that it removed the _ and R1     
+
+Now we will run the following command:    
+
+```
+multiple_split_libraries_fastq.py -i ~/16s_analysis/joined -o ~/16s_analysis/filtered -m sampleid_by_file --include_input_dir_path --remove_filepath_in_name  --mapping_indicator ~/16s_analysis/map.txt
+```
+This will also demultiplex but it was already done sooooo we told it to include_input_dir_path    
+* this tells it all of these files will be named exaclty the same thing so take the name of the directory     
+
+--mapping_indicator tells it to use the map file     
+She accidently...     
+
+Edit her script to say: "--mapping_indicator /data/project_data/16s/map.txt"    
+
+```
+multiple_split_libraries_fastq.py -i ~/16s_analysis/joined -o ~/16s_analysis/filtered -m sampleid_by_file --include_input_dir_path --remove_filepath_in_name  --mapping_indicator /data/project_data/16s/map.txt
+```
+
+-o means output    
+* it will create the filtered directory     
+
+Run the above (edited command)    
+
+
+While this ran we talked about the BIG PROJECT:    
+* the last two class sessions are open sessions where we come in and can get help     
+  * there is this week and next week then the final week is the open sessions    
+* sit down with groups ahead of those sessions to decide what we want to do     
+* the following week (May1st) is when we will present our final presentation (group) and the following week the write up is due (individual)     
+* Syllabus has guidelines for write up (written in molecular ecology style (check website for specific instructions); page length = 4500 words, combined total 5 tables and figures)    
+* Presentation guidelines:    
+  * 15min    
+  * provide background to motivate hypothesis    
+    system    
+    disease    
+    and how it motivates what we are testing    
+  * discussion of analysis pipeline (main methods)    
+  * presentation of results and a discussion on them    
+  * can be an outline for the write up     
+  * can split with people in group     
+  * similar structure to our assignments     
+  * We can used slide (powerpoint)     
+* if we come across new methods we want to try (that we came across in papers etc) we can mention it to Steve and Melissa and they will try to help     
+
+NOw that the command is done you should have a filtered directory (go check):    
+
+```
+cd ~/16s_analysis/
+ll
+```
+Its there!    
+
+Next we will do a check before we run the command that runs for 4 days to try and eliminate errors     
+
+First lets check the file called "seqs.fna" in the filtered directory:    
+
+```
+cd filtered/
+ll
+head seqs.fna 
+```
+
+We are testing that our file has data in it so we are extracting data from the file into a "test" file (which we will later delete) to see if it extracts anything:    
+
+```
+extract_seqs_by_sample_id.py -i seqs.fna -o test -s 04-5-05
+```
+
+head the "test" file and it should be all "04-5-05" files     
+
+```
+ll
+head test 
+```
+Good!    
+
+Now lets remove the file becuase we don't need it:    
+
+```
+rm test
+```
+
+Now we will make the table:    
+there are a few ways to do this:    
+* open reference OTU picking    
+  * no data base; uses sequence reltaedness to each other     
+  * great but extreamly computationally intensive; better to do with a smaller data set     
+* closed OTU picking    
+  * uses a database    
+
+Currently  the "pick_open_reference_otus.py" is the recommended one to use    
+
+we will first run closed then run open (I think thats what she said)
+
+
+This command take 4 days, we will test the file and let it run to see if any errors then kill the command     
+
+```
+cd ~/16s_analysis
+pick_open_reference_otus.py -i ~/16s_analysis/filtered/seqs.fna -o ~/16s_analysis/otus  --parallel --jobs_to_start 1
+```
+
+Count to 10 then cancel the command by hitting "Ctrl C"    
+
+remove the file now because we didn't let it run all the way:    
+
+```
+rm -r otus 
+```
+
+She ran the full command earlier so lets go look at it (no need to copy it just look):    
+
+```
+cd /data/project_data/16s/otu_table
+ll
+biom summarize-table -i /data/project_data/16s/otu_table/otu_table_mc2_w_tax_no_pynast_failures.biom
+```
+
+The one with the longest name is the one to look at (because the most things have been done to it)    
+
+Running the "biom summarize table" is what you run to check for errors     
+What we want to see (important numbers):    
+* number of samples: 176    
+* Number of observations: 93033 # of OTUs; its alot and we will filter them later     
+
+Indicators of if errors occured:    
+* anything other then the # of individuals we started with    
+* if the other numbers (num observations, etc) are low     
+  * low is subjective but look at lit to see what is acceptable     
+
+      
+Next class we will filter the OTU table and maybe even start working with the filtered data set in R    
+​    
+HOMEWORK: get phyloseq up and running in R before next class (google how to do it)     
+* install package and see that its running    
+
+We had some time in class so we installed it in class     
 
 ------
 
