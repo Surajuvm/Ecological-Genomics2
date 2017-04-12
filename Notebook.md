@@ -54,7 +54,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 19: 2017-03-29](#id-section19). Notes from class commands 2017-03-29; ADMIXTURE
 * [Page 20: 2017-04-03](#id-section20). Notes from class commands 2017-04-03; OutFLANK
 * [Page 21: 2017-04-05](#id-section21). Script for Homework 3; vcftools and PCA plots; 2017-04-05
-* [Page 22:](#id-section22).
+* [Page 22: 2017-04-05](#id-section22). Notes from class commands 2017-04-05; Gene annotation and enrichment 
 * [Page 23:](#id-section23).
 * [Page 24:](#id-section24).
 * [Page 25:](#id-section25).
@@ -3828,8 +3828,125 @@ gl3$loc.names[which(quantile(abs(pca3$loadings),0.999)>0.0770)]
 
 <div id='id-section22'/> 
 
-### Page 22:  
+### Page 22: Notes from class commands 2017-04-05; Gene annotation and enrichment   
 
+Gene annotation:   
+
+Most of this has beeen done already by Melissa; we will be walking through what has been done    
+
+It's good to BLAST to both NR database and Uniprot because:    
+1) Uniprot can do alot but it is more curiated therefore has less genes to match too   
+2) NR has more (genes/protiens?)   
+
+NR takes a while so Melissa started running it but also ran in DIAMOND which goes much faster   
+Here is a diagram showing what was done:   
+
+**INSERT DIAGRAM HERE**   
+
+You do this on a **server** (not on a web browser)    
+Therefore we install the BLAST+ programs on our server, download and format the NR and UniProt databases, and run BLAST on our server!   
+
+Once downloaded we run the following command:   
+
+```
+$ makeblastdb -in uniprot_sprot.pep -dbtype prot
+```
+
+The following is where you actually run your files to annotate them:   
+
+**BE SURE TO START A SCREEN** since this will run for a while   
+
+```
+#!/bin/bash
+
+# This single line using the blastp command below will compare your transcript fasta file
+# (-query) to the already formatted uniref90 database (-db).
+# You can enter 'blastp --help' for a list of the parameters.
+# We choose the tab-delimited output format (6) and to only help the top hit (-max_target_seqs)
+# and only if it has a minimum evalue of 0.00001.
+
+blastp -query /data/project_data/assembly/08-11-35-36_cl20_longest_orfs_gene.cds \
+       -db /data/project_data/assembly/database/uniref90/uniprot_sprot.pep \
+       -out /data/project_data/assembly/blast/blastp_vs_uniprot.outfmt6 \
+       -outfmt 6 \
+       -evalue 1e-5 \
+       -max_target_seqs 1
+```
+The codes she used for each database she compared to can be found in:    
+
+```
+data/scripts/
+ll
+```
+The scripts include (but are not limited to:   
+
+```
+blastp_nr.sh
+blastp_Pm.sh 
+blastp_uniprot.sh 
+```
+
+To make a master table: There is code but it isn't posted   
+* it uses a series of merge commands; didn't talk too much about it today    
+
+Make annotation table: more stuff we don't know...    
+
+Today we are going to work on funcional enrichment analysis   
+
+To do so we need to move EVERYTHING from here   
+
+```
+/data/project_data/enrichment
+```
+into a folder on your desktop    
+
+Open the "GO_MWU_class.R" script in R studio    
+
+set your working directory to the folder you just created and dumped everything into    
+
+We ran lines 23 - 35 but ran into issues.  Will troubleshoot and try again (later)   
+
+UPDATE:   
+It was an issue with PCs because the we did not have perl built in.   
+we downloaded perl, restarted the computer, re-ran the script and it worked!   
+I'm not sure what it means but here are the "results"   
+
+```
+go.obo annotation_table results_int_H0vsS1_neglogpval BP largest=0.1 smallest=5cutHeight=0.25
+
+Run parameters:
+
+largest GO category as fraction of all genes (largest)  : 0.1
+         smallest GO category as # of genes (smallest)  : 5
+                clustering threshold (clusterCutHeight) : 0.25
+
+-----------------
+retrieving GO hierarchy, reformatting data...
+
+-------------
+go_reformat:
+Genes with GO annotations, but not listed in measure table: 422
+
+Terms without defined level (old ontology?..): 0
+-------------
+-------------
+go_nrify:
+1724 categories, 2226 genes; size range 5-222.6
+	30 too broad
+	1006 too small
+	688 remaining
+
+removing redundancy:
+
+calculating GO term similarities based on shared genes...
+311 non-redundant GO categories of good size
+-------------
+
+Secondary clustering:
+calculating similarities....
+Continuous measure of interest: will perform MWU test
+0  GO terms at 10% FDR
+```
 ------
 
 <div id='id-section23'/> 
