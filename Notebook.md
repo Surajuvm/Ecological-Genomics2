@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-              D* You can document anything you'd like, aside from logging your research activities. For example:
+               D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -57,7 +57,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 22: 2017-04-05](#id-section22). Notes from class commands 2017-04-05; Gene annotation and enrichment 
 * [Page 23: 2017-04-10](#id-section23). Notes from class commands 2017-04-10; 16s data analysis (Part 1)
 * [Page 24: 2017-04-12](#id-section24). Notes from class commands 2017-04-12; 16s data analysis (Part 2)
-* [Page 25:](#id-section25).
+* [Page 25: 2017-04-17](#id-section25). Notes from class commands 2017-04-17; 16s data analysis (Part 3)
 * [Page 26:](#id-section26).
 * [Page 27:](#id-section27).
 * [Page 28:](#id-section28).
@@ -4208,7 +4208,7 @@ Indicators of if errors occured:
 * if the other numbers (num observations, etc) are low     
   * low is subjective but look at lit to see what is acceptable     
 
-      
+
 Next class we will filter the OTU table and maybe even start working with the filtered data set in R    
 ​    
 HOMEWORK: get phyloseq up and running in R before next class (google how to do it)     
@@ -4326,7 +4326,119 @@ Run all lines 1-40 by the end of class
 
 <div id='id-section25'/> 
 
-### Page 25:  
+### Page 25: Notes from class commands 2017-04-17; 16s data analysis (Part 3)  
+
+We will be working in R today:   
+
+* Open R studio   
+* open the "phyloseq_script.R"   
+* set the working directory to the correct folder   
+* run commands line 1-22   
+
+**line 8:** assigns everything that is needed for making an otu table to that command; converts .biom file to a readable format in R    
+
+OTU table is NOT normalized at this point; it will get normalized as we go along   
+
+Head and tail the table to see what it looks like:   
+
+```
+head(otu_table(phylo))
+tail(otu_table(phylo))
+```
+
+when we ran a head we saw only numbers on the left cloumn (those are assigned if close picking was done)   
+when you run the **tail** you see the rows are called "New.CleanUp.ReferenceOTU6178058" which is assigned when open picking was done.   
+
+Next we will test for differentially expressed OTUs    
+* wrapper for DESeq2; takes data from a different format and make it accessable in a different format    
+
+For simplicity sake we only want to compare sick and healthy (not dead) so we will remove the dead samples by running line 32   
+
+**line 35-36:** we want to change any integers (#1) to a name (name 1)   
+
+**line 39:** the last thing you put model is what it will compare   
+* phenotype is at the time of sampling (not final phenotype)    
+* this controls for the repeated measure of individual(?)   
+
+**line 42:** takes some time    
+
+While its running she will show us the resources she used to get here (resources can be found at the top of her tutorial):   
+* QIIME gitbook https://www.gitbook.com/book/twbattaglia/introduction-to-qiime/details    
+* QIIME tutorial for working with Illumina data: http://nbviewer.jupyter.org/github/biocore/qiime/blob/1.9.1/examples/ipynb/illumina_overview_tutorial.ipynb    
+* phyloseq: http://qiime.org/scripts/compare_categories.html    
+  * use the tutorials; super helpful; they provide data sets which can help narrow down if issue with package/command or with your own data.    
+
+NOTE: the QIIME scripts website updates REALLY fast but they don't list if a script is outdate; the gitbook is helpful for figuring that out    
+
+She used "compare_categories" to help figure out what she needed to do http://qiime.org/scripts/compare_categories.html    
+
+**Alpha diversity** is the diversity in *one sample*; basically species richness; # of unique OTUs a species has   
+
+**Beta diversity** is the *between samples* component of diversity.    
+
+The command is done running so now we will look at the results by running lines 45-49   
+
+**line 56:** make a table of all the significant values; you can set the p value to what you want in line 52   
+Run lines 52-57   
+
+**Line 60:** write the table we just made to our computer so we can open it up and look at the ones that were diff expressed    
+* NOTE: at this point it shows the ones that differ in **abundance** not taxa    
+
+**Lines 63-75:** makes a plot; run them all together    
+* this shows you what taxa were diff sig expressed    
+* each point is one OTU that is diff expressed between sick and healthy   
+* log fold change is how diff expressed they are    
+
+If you are ever not sure about which is compared to which you run "head"   
+
+since it says sick vs healthy you know:    
+* pos = up in sick    
+* neg = down in sick   
+
+
+Next we will look at particular OTUs of interest and make a plot; choose individual otus from list of significantly diff otus generated and put into "pheno_sigtable"   
+
+Run lines 78-82   
+* change otu you want to run by changing "New.ReferenceOTU2814" on line 78 and 79    
+
+OTU 2814 is up reg (aka more ind.) in healthy and less in sick    
+
+   
+
+Now we will start testing for diff expression ***between samples***   
+
+We will start with looking at OTUs that are change in # as an indv changes from healthy -> sick -> more sick -> dead    
+* to look at change in health status we run "pheno_num"   
+
+**Lines 88 to line 89** does same as above, take integer and gives it a name    
+
+**Line 92:** sets "pheno_num" as the variable you are comparing   
+* since individual is lister first it means we are taking into account that individuals were sampled multipule times over time (right?)   
+
+**Line 95:** runs the DESeq2; will take a while (20min?)   
+
+When you run the head command (line 99) you should see what that table is comparing by looking at "wald test p-value" (should say 5 vs 0)   
+
+The "wald" test is a chi square test comparing the level of expression (or in this case OTUS0 between your two categories of interest with the null hyp that the two groups are the same   
+* sig p values means that the test stat was higher then expected; there was a true diff between the groups   
+* Melanie was advised to use this test in the tutorial    
+
+She as written out how to compare healthy to S_1 -> S_5 but we might not so this in class and do a plot instead    
+
+We decided to do the graph so that we can move on from phyloseq starting next class   
+
+So **skip down to line 133**   
+
+Rarefy helps with reproducability; do this in **line 135 and 136**    
+
+**Lines 139-141:** check that we rarified correctly by generating a plot where all the samples should have the same number of reads   
+
+Next we will make a graph that shows the relative abundance of the taxa in the ones, in the twos, in threes...   
+we want the hight of the bars to all be the sample; thats what line ___ does    
+
+run lines 145-150 together   
+
+NOTE: we had an issue with color brewer but the general graph is correct    
 
 ------
 
