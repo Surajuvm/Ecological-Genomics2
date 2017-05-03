@@ -20,7 +20,7 @@ The purpose of this notebook is to keep track of and organize the information th
 *  The notebook is set up with a series of internal links from the table of contents.    
 *  All notebooks should have a table of contents which has the "Page", date, and title (information that allows the reader to understand your work).     
 *  Also, one of the perks of keeping all activities in a single document is that you can **search and find elements quickly**.     
-               D* You can document anything you'd like, aside from logging your research activities. For example:
+                D* You can document anything you'd like, aside from logging your research activities. For example:
    * feel free to log all/any ideas for your research project([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#page-39-2016-06-13-post-doc-project-idea-assessing-current-impacts-of-climate-change-in-natural-populations)) as an entry,     
    * or write down notes for a paper([example](https://github.com/adnguyen/Notebooks_and_Protocols/blob/master/2016_notebook.md#id-section36).      
 
@@ -58,7 +58,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 23: 2017-04-10](#id-section23). Notes from class commands 2017-04-10; 16s data analysis (Part 1)
 * [Page 24: 2017-04-12](#id-section24). Notes from class commands 2017-04-12; 16s data analysis (Part 2)
 * [Page 25: 2017-04-17](#id-section25). Notes from class commands 2017-04-17; 16s data analysis (Part 3)
-* [Page 26:](#id-section26).
+* [Page 26: 2017-04-19](#id-section26). Notes from class commands 2017-04-19; 16s data analysis (Part 4); PIECRUST
 * [Page 27:](#id-section27).
 * [Page 28:](#id-section28).
 * [Page 29:](#id-section29).
@@ -4444,7 +4444,159 @@ NOTE: we had an issue with color brewer but the general graph is correct
 
 <div id='id-section26'/> 
 
-### Page 26:  
+### Page 26: Notes from class commands 2017-04-19; 16s data analysis (Part 4); PIECRUST  
+
+**PICRUST** allows you to get at some of the info you would get when doing whole genome sequencing without having to do whole genome   
+
+* uses an extended ancestral-state reconstruction algorithm to identify a closely related microbe with known full genome sequence to each OTU   
+  * takes your...   
+
+Has NSTI (nearest sequenced_____)   
+
+gives you an OTU type table in a similar format (.biom); counts table   
+
+Big limitation:   
+* can only work with an OTU that is a closed references OTU; the picking that uses a reference database (aka the best understood OTUs)   
+
+if OTU has just a number = not with closed picking   
+any work in front of the OTU = picked with closed (check)   
+
+The majority of ours were NOT picked with the closed reference so our first step is to pick with the closed reference (closed OTU table)   
+
+NOTE: can run from home directory or the directory where the files are because this tells it where to go:   
+
+```   
+filter_otus_from_otu_table.py -i ~/16s_analysis/otu_table_mc2_w_tax_no_pynast_failures_no_chimeras_frequency_filtered.biom -o ~/16s_analysis/closed_otu_table.biom --negate_ids_to_exclude -e /usr/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set/97_otus.fasta 
+```
+
+we now have 259 OTUs (low number)      
+
+normalize by picrust’s method:   
+* normalizes by copy number
+
+```   
+normalize_by_copy_number.py -i ~/16s_analysis/closed_otu_table.biom -o ~/16s_analysis/closed_otu_table_norm.biom   
+```
+
+Now we will do what we came here to do; predict metagenomes    
+
+The output of PICRUST is the same format as an OTU table but instead of OTUS, KEGG Orthology terms are used. For a tab delimited output:   
+
+```
+predict_metagenomes.py -f -i ~/16s_analysis/closed_otu_table_norm.biom -o ~/16s_analysis/metagenome_predictions.txt -a nsti_per_sample.txt 
+```
+-f means to put in tab delimited format    
+-a we want you to calc thes ____ numb...(CHECK)   
+
+Below is the same but the format is different (no -f); we will be able to look at the one below but we can't look at the one above   
+
+```
+predict_metagenomes.py -i ~/16s_analysis/closed_otu_table_norm.biom -o ~/16s_analysis/metagenome_predictions.biom -a nsti_per_sample.txt   
+```
+
+Now we can look at the file generated from the above command:   
+
+```   
+head metagenome_predictions.txt   
+```
+
+each row is a KO term; if we count the number of rows we will know the number of terms that got prediceted so we will do that next:   
+
+```
+wc -l metagenome_predictions.txt   
+```
+
+6,910 KO terms/rows   
+there are more ko terms then OTUs; there are large number of KO terms per OTU    
+
+
+Collapse to higher KO hierarchy term    
+
+```
+categorize_by_function.py -f -i metagenome_predictions.biom -c KEGG_Pathways -l 3 -o metagenome_predictions.L3.txt   
+```
+
+We also want this output in .biom format to use in R    
+
+```
+categorize_by_function.py -i metagenome_predictions.biom -c KEGG_Pathways -l 3 -o metagenome_predictions.L3.biom   
+```
+
+Move metagenome_predictions.L3.biom to your desktop to use in R; use WINSCP   
+
+
+Move into R and copy and paste the script from the tutorial into an new R script; saved script as "PIECRUST.R"
+
+```
+library("phyloseq"); packageVersion("phyloseq")
+library("DESeq2")
+packageVersion("DESeq2")
+library("ggplot2")
+theme_set(theme_bw())
+library('biom')
+
+x = read_biom("metagenome_predictions.L3.biom")
+otumat = as(biom_data(x), "matrix")
+OTU = otu_table(otumat, taxa_are_rows=TRUE)
+
+
+mapping <- import_qiime_sample_data(mapfilename = 'R_map.txt')
+
+phylo <- merge_phyloseq(OTU, mapping)
+phylo
+
+###############################################################################
+###Test for DE KO terms between individuals that got sick and those that didn't
+###############################################################################
+
+final_pheno = phyloseq_to_deseq2(phylo, ~ Final_phenotype)
+final_pheno_results = DESeq(final_pheno, test="Wald")
+final_pheno_res = results(final_pheno_results)
+summary(final_pheno_res)
+head(final_pheno_res)
+
+alpha = 0.05
+final_pheno_sigtab = final_pheno_res[which(final_pheno_res$padj < alpha), ]
+final_pheno_sigtab= cbind(as(final_pheno_sigtab, "data.frame"), as(tax_table(phylo)[rownames(final_pheno_sigtab), ], "matrix"))
+head(final_pheno_sigtab)
+final_pheno_sigtab
+write.table(final_pheno_sigtab, "Final_pheno_L3.txt", sep="\t")
+```
+
+Load all libraries (line 1-6)   
+
+ERROR when loading the biom library    
+* this took a while to troubleshoot so we ended up following along on her screen    
+  * see audio in onenote   
+
+WAIT: they found a solution: (this has been added to script)   
+
+```
+install.packages("RJSONIO")   
+```
+once that is done running go to:   
+
+https://cran.r-project.org/src/contrib/Archive/biom/   
+
+and download the newest: biom_0.3.12.tar.gz   
+* I put it in the same folder where we are working out of   
+
+go back to R and run this:   
+
+```
+install.packages("~/OTU r scripts and files/biom_0.3.12.tar.qz", repos=NULL, type="source")   
+```
+ERROR invalid package   
+
+nope never mind still taking too long so she ran it on the screen:   
+
+lines 24-28: similar to phyloseq deseq we ran the other day.   
+
+lines 30-35: build the table and output it to your computer    
+
+
+
+
 
 ------
 
