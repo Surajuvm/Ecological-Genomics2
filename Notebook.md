@@ -59,7 +59,7 @@ The purpose of this notebook is to keep track of and organize the information th
 * [Page 24: 2017-04-12](#id-section24). Notes from class commands 2017-04-12; 16s data analysis (Part 2)
 * [Page 25: 2017-04-17](#id-section25). Notes from class commands 2017-04-17; 16s data analysis (Part 3)
 * [Page 26: 2017-04-19](#id-section26). Notes from class commands 2017-04-19; 16s data analysis (Part 4); PIECRUST
-* [Page 27:](#id-section27).
+* [Page 27: 2017-05-03](#id-section27). Script for FINAL PROJECT 2017-05-03; DESeq2 and Gene annotation. 
 * [Page 28:](#id-section28).
 * [Page 29:](#id-section29).
 * [Page 30:](#id-section30).
