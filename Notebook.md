@@ -4602,7 +4602,194 @@ lines 30-35: build the table and output it to your computer
 
 <div id='id-section27'/> 
 
-### Page 27:  
+### Page 27: Script for FINAL PROJECT 2017-05-03; DESeq2 and Gene annotation.   
+
+Code use to run my part of the Final Project:
+
+```
+setwd("C:/Users/Hannah/Desktop/Ecological Genomics class/DGE data from 2-27")   
+library("DESeq2")   
+
+library("ggplot2")   
+
+countsTable <- read.delim('countsdata_trim2.txt', header=TRUE, stringsAsFactors=TRUE, row.names=1)   
+countData <- as.matrix(countsTable)   
+#head(countData)   
+
+conds <- read.delim("cols_data_trim.txt", header=TRUE, stringsAsFactors=TRUE, row.names=1)   
+head(conds)
+colData <- as.data.frame(conds)
+#head(colData)
+
+###########Code for Objective 2 can be found on Lisa Chamberland's git hub######################
+
+##Code for Objective 1
+#Subsampling for Objective 1 (sick)
+
+#SSS (28); Day 3, Day 6, Day 9
+#count
+count_SSS1 = countData[,43:45]
+
+#col
+col_SSS1 = colData[43:45,]
+
+#SSS (29); Day 3, Day 6, Day 9
+#count
+count_SSS2 = countData[,46:48]
+
+#col
+col_SSS2 = colData[46:48,]
+
+#SSS (36); Day 3, Day 6, Day 9
+#count
+count_SSS3 = countData[,71:73]
+
+#col
+col_SSS3 = colData[71:73,]
+
+#SSS (08); Day 9, Day 12, Day 15
+#count
+count_SSS4 = countData[,6:8]
+
+#col
+col_SSS4 = colData[6:8,]
+
+#SSS (09); Day 9, Day 12, Day 15
+#count
+count_SSS5 = countData[,10:12]
+
+#col
+col_SSS5 = colData[10:12,]
+
+#Now we will merge the col_SSS files together and the count_SSS files together
+#we use rbind for col data since the ID is a row
+col_SSS <- rbind.data.frame(col_SSS1,col_SSS2,col_SSS3,col_SSS4,col_SSS5)
+dim(col_SSS)
+
+#we use cbind for count since ID is a column
+count_SSS <- cbind.data.frame(count_SSS1,count_SSS2,count_SSS3,count_SSS4,count_SSS5)
+dim(count_SSS)
+
+
+#Subsampling for objective 3 (healthy)
+#col
+col_HHH_1 = colData[13:15,]
+col_HHH_2 = colData[34:36,]
+col_HHH_3 = colData[40:42,]
+col_HHH_4 = colData[49:51,]
+col_HHH_5 = colData[58:60,]
+col_HHH_6 = colData[63:65,]
+
+#merge col tables
+col_HHH_total <- rbind.data.frame(col_HHH_1, col_HHH_2, col_HHH_3, col_HHH_4, col_HHH_5, col_HHH_6)
+
+dim(col_HHH_total)
+
+#count
+count_HHH_1 = countData[,13:15]
+count_HHH_2 = countData[,34:36]
+count_HHH_3 = countData[,40:42]
+count_HHH_4 = countData[,49:51]
+count_HHH_5 = countData[,58:60]
+count_HHH_6 = countData[,63:65]
+
+#merge count tables
+count_HHH_total <- cbind.data.frame(count_HHH_1, count_HHH_2, count_HHH_3, count_HHH_4, count_HHH_5, count_HHH_6)
+
+dim(count_HHH_total)
+
+#Now we need to combine the count healthy and sick files and the col healthy and sick files
+#count
+count_obj3 <- cbind.data.frame(count_HHH_total,count_SSS)
+
+dim(count_obj3)
+
+#col
+col_obj3 <- rbind.data.frame(col_HHH_total,col_SSS)
+
+dim(col_obj3)
+
+#Now we can start the time course DESeq2 command (model 1 from 2/27/17)
+#we are having issues with using indiv as a control so for now we will use location as a control
+ddsobj3 <- DESeqDataSetFromMatrix(countData = count_obj3, colData = col_obj3, design = ~ location + health)
+ddsobj3 <- ddsobj3[ rowSums(counts(ddsobj3)) > 100, ]
+
+dim(ddsobj3)
+
+ddsobj3 <- DESeq(ddsobj3, parallel=T)
+resobj3 <- results(ddsobj3)
+resobj3$symbol <- mcols(ddsobj3)$symbol
+
+head(resobj3[order(resobj3$padj),],4)
+summary(resobj3)
+
+
+#Add code for: volcano plot, PCA, and venn diagram ##############################
+#volcano plot
+which(resobj3$padj <0.05)
+sig.genes.health <- resobj3[which(resobj3$padj <0.05),]
+head(sig.genes.health)
+
+with(resobj3, plot(log2FoldChange, -log10(pvalue), pch=20, main="Differential gene expression of HHH vs SSS", xlim=c(-5.5,5)))
+
+points(sig.genes.health$log2FoldChange,-log10(sig.genes.health$pvalue), col='red', pch=20)
+
+
+#code for PCA plot
+vsd.h <- varianceStabilizingTransformation(ddsobj3, blind=FALSE)
+
+p.h <- plotPCA(vsd.h, intgroup=c("health"))
+
+p.h +ggtitle("PCA plot of HHH vs SSS") +theme(plot.title = element_text(hjust = 0.5), axis.title = element_text(size=12), axis.text = element_text(size=12))
+
+
+
+
+
+#################Functional enrichment####################################
+#We need to take the results from DEseq2 and make a table with two columns: gene ID and LFC 
+#Therefore we need to export the results file:
+#write.csv(resobj3, file = "Resultsobj3.csv", quote=F, row.names=T)
+
+#now we bring all the files we need into R:
+
+input="Resultsobj3_edited3.csv" 
+goAnnotations="annotation_table" 
+goDatabase="go.obo" 
+goDivision="BP" 
+source("gomwu.functions.R")
+
+
+# Calculating stats. It takes ~3 min for MF and BP. Do not rerun it if you just want to replot the data with different cutoffs, go straight to gomwuPlot. If you change any of the numeric values below, delete the files that were generated in previos runs first.
+
+gomwuStats(input, goDatabase, goAnnotations, goDivision, perlPath="perl", largest=0.1, smallest=5, clusterCutHeight=0.25)
+
+#Nothing was functionally enriched so we will manually look at the DE genes indentified in DESeq2 to see what their funtions are. See code below on how this was done.
+
+##########################DE gene gene annotation##############################
+
+#First we take the results file from DESeq2 and take out the genes that were significant (<0.05)
+#we already generated an object that contains all the gene IDs that are significant: sig.genes.health
+# start by reading in the FULL annotation table:
+GOterms <- read.table("poch_uniprot_GO_nr.txt", header=TRUE, sep = "\t")
+
+#Check how many genes are significant:
+summary(sig.genes.health)
+
+#Now we will pull out the significant GO terms
+GOtermssig <- GOterms[GOterms$trinID %in% row.names(sig.genes.health),]
+
+#Since there are around 205 genes that are sinificant focus on reporting: 1) the # of sig 2) only report the function of the top %
+#to do this change the sig level set when setting sig.genes.health:
+sig.genes.health.top <- resobj3[which(resobj3$padj <0.0001),]
+summary(sig.genes.health.top)
+
+GOtermssig_0001 <- GOterms[GOterms$trinID %in% row.names(sig.genes.health.top),]
+
+#To export this file we use the following command:
+write.csv(GOtermssig_0001, file = "top20siggenes_GO.csv", quote=F, row.names=T)
+
+```
 
 ------
 
